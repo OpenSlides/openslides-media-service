@@ -41,6 +41,28 @@ class Database:
                 )
             return (row[0], row[1])
 
+    def set_mediafile(self, media_id, media, mimetype):
+        while True:
+            try:
+                connection = self.get_connection()
+                return self._insert(connection, media_id, media, mimetype)
+            except psycopg2.InterfaceError:
+                if self.connection:
+                    self.connection.close()
+                self.connection = None
+                self.logger.info("Database connection has been reset. Reconnect...")
+            except psycopg2.Error as e:
+                self.logger.error(f"Error during inserting a mediafile: {repr(e)}")
+                raise ServerError(f"Database error {e.pgcode}: {e.pgerror}")
+
+    def _insert(self, connection, media_id, media, mimetype):
+        with connection.cursor() as cur:
+            cur.execute(
+                "INSERT INTO mediafile_data (id, data, mimetype) "
+                " VALUES (%s, %s, %s)",
+                (media_id, media, mimetype),
+            )
+
     def get_connection(self):
         if not self.connection:
             self.connection = self.create_connection()

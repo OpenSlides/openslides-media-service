@@ -1,11 +1,13 @@
 import atexit
+import base64
+import json
 
 from flask import Flask, Response, request
 
 from .auth import get_mediafile_id
 from .config_handling import init_config
 from .database import Database
-from .exceptions import HttpError, NotFoundError
+from .exceptions import HttpError, NotFoundError, ServerError
 from .logging import init_logging
 
 app = Flask(__name__)
@@ -46,6 +48,22 @@ def serve(meeting_id, path):
 
     block_size = app.config["BLOCK_SIZE"]
     return Response(chunked(block_size, data), mimetype=mimetype)
+
+
+@app.route("/internal/media/upload/", methods=["POST"])
+def media_post():
+    try:
+        decoded = request.data.decode()
+        dejson = json.loads(decoded)
+        media = base64.b64decode(dejson["file"].encode())
+    except Exception:
+        raise ServerError(
+            f"The post request.data is not in right format: {request.data}"
+        )
+    app.logger.debug(f"to database media {dejson['id']} {dejson['mimetype']}")
+    global database
+    database.set_mediafile(int(dejson["id"]), media, dejson["mimetype"])
+    return f"Mediaserver: add {dejson['id']} to db", 200
 
 
 def shutdown(database):
