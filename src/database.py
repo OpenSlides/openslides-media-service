@@ -17,9 +17,10 @@ class Database:
         while True:
             connection = self.get_connection()
             try:
-                media = self._query(connection, media_id)
-                self.cache.set_media(media_id, media)
-                return media
+                with connection:
+                    media = self._query(connection, media_id)
+                    self.cache.set_media(media_id, media)
+                    return media
             except psycopg2.InterfaceError:
                 if self.connection:
                     self.connection.close()
@@ -45,7 +46,8 @@ class Database:
         while True:
             try:
                 connection = self.get_connection()
-                return self._insert(connection, media_id, media, mimetype)
+                with connection:
+                    return self._insert(connection, media_id, media, mimetype)
             except psycopg2.InterfaceError:
                 if self.connection:
                     self.connection.close()
