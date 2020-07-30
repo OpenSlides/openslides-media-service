@@ -56,14 +56,16 @@ def media_post():
         decoded = request.data.decode()
         dejson = json.loads(decoded)
         media = base64.b64decode(dejson["file"].encode())
+        media_id = int(dejson["id"])
+        mimetype = dejson["mimetype"]
     except Exception:
         raise ServerError(
             f"The post request.data is not in right format: {request.data}"
         )
-    app.logger.debug(f"to database media {dejson['id']} {dejson['mimetype']}")
+    app.logger.debug(f"to database media {media_id} {mimetype}")
     global database
-    database.set_mediafile(int(dejson["id"]), media, dejson["mimetype"])
-    return f"Mediaserver: add {dejson['id']} to db", 200
+    database.set_mediafile(media_id, media, mimetype)
+    return f"Mediaserver: add {media_id} to db", 200
 
 
 def shutdown(database):
