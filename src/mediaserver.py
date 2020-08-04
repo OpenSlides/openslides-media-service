@@ -68,6 +68,14 @@ def media_post():
     return f"Mediaserver: add {media_id} to db", 200
 
 
+# for testing
+@app.route("/system/presenter", methods=["POST"])
+def dummy_presenter():
+    app.logger.debug(f"dummy_presenter gets: {request.json}")
+    meeting_id = request.json[0]["data"]["meeting_id"]
+    return f"[{meeting_id}]"
+
+
 def shutdown(database):
     app.logger.info("Stopping the server...")
     database.shutdown()
