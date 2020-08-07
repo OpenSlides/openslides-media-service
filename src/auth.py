@@ -1,12 +1,10 @@
-import os
-
 import requests
 
 from .exceptions import NotFoundError, ServerError
 
 
 def get_mediafile_id(meeting_id, path, app, cookie):
-    presenter_url = get_presenter_url(meeting_id, path)
+    presenter_url = get_presenter_url(app, meeting_id, path)
     app.logger.debug(f"Send check request: {presenter_url}")
     payload = [
         {
@@ -38,11 +36,7 @@ def get_mediafile_id(meeting_id, path, app, cookie):
     return id
 
 
-def get_presenter_url(meeting_id, path):
-    presenter_host = os.environ.get("PRESENTER_HOST")
-    presenter_port = os.environ.get("PRESENTER_PORT")
-    if presenter_host is None:
-        raise ServerError("PRESENTER_HOST is not set")
-    if presenter_port is None:
-        raise ServerError("PRESENTER_PORT is not set")
+def get_presenter_url(app, meeting_id, path):
+    presenter_host = app.config["PRESENTER_HOST"]
+    presenter_port = app.config["PRESENTER_PORT"]
     return f"http://{presenter_host}:{presenter_port}/system/presenter"
