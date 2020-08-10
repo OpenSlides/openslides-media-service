@@ -16,5 +16,10 @@ def test_mediaservice_not_found():
 
 
 def test_mediaservice_auth_problem():
-    req = requests.get("http://media:9006/system/media/get/12/test")
+    req = requests.get("http://media:9006/system/media/get/12/fail")
+    assert req.status_code == 404
+
+
+def test_mediaservice_auth_problem2():
+    req = requests.get("http://media:9006/system/media/get/13/fail")
     assert req.status_code == 500

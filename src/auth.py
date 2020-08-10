@@ -32,7 +32,7 @@ def get_mediafile_id(meeting_id, path, app, cookie):
     try:
         id = int(response.json()[0])
     except Exception:
-        raise ServerError("The Response did not contain a valid id.")
+        raise NotFoundError("The Response did not contain a valid id.")
     return id
 
 
