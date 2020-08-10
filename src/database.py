@@ -48,7 +48,7 @@ class Database:
                 connection = self.get_connection()
                 with connection:
                     self._insert(connection, media_id, media, mimetype)
-                    break
+                break
             except psycopg2.InterfaceError:
                 if self.connection:
                     self.connection.close()
