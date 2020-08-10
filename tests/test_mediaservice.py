@@ -25,7 +25,7 @@ def test_mediaservice_auth_problem():
     assert req.status_code == 500
 
 
-def test_mediaservice_post():
+def test_mediaservice_post_good_test():
     payload = {
         "file": base64.b64encode(b"testtesttest").decode(),
         "id": 5,
@@ -38,3 +38,32 @@ def test_mediaservice_post():
     assert req2.status_code == 200
     assert req2.content == b"testtesttest"
     assert "text/plain" in req2.headers.get("Content-Type")
+
+
+def test_mediaservice_post_not_base64_file():
+    payload = {
+        "file": "XXX",
+        "id": 7,
+        "mimetype": "text/plain",
+    }
+    req = requests.post(POST_URL, json=payload)
+    assert req.status_code == 500
+
+
+def test_mediaservice_post_broken_id():
+    payload = {
+        "file": base64.b64encode(b"testtesttest").decode(),
+        "id": "XXX",
+        "mimetype": "text/plain",
+    }
+    req = requests.post(POST_URL, json=payload)
+    assert req.status_code == 500
+
+
+def test_mediaservice_missing_mimetype():
+    payload = {
+        "file": base64.b64encode(b"testtesttest").decode(),
+        "id": 6,
+    }
+    req = requests.post(POST_URL, json=payload)
+    assert req.status_code == 500
