@@ -7,7 +7,7 @@ from flask import Flask, Response, request
 from .auth import get_mediafile_id
 from .config_handling import init_config
 from .database import Database
-from .exceptions import HttpError, NotFoundError, ServerError
+from .exceptions import BadRequestError, HttpError, NotFoundError
 from .logging import init_logging
 
 app = Flask(__name__)
@@ -55,11 +55,17 @@ def media_post():
     try:
         decoded = request.data.decode()
         dejson = json.loads(decoded)
+    except Exception:
+        raise BadRequestError("request.data is not json")
+    try:
         media = base64.b64decode(dejson["file"].encode())
+    except Exception:
+        raise BadRequestError("cannot decode base64 file")
+    try:
         media_id = int(dejson["id"])
         mimetype = dejson["mimetype"]
     except Exception:
-        raise ServerError(
+        raise BadRequestError(
             f"The post request.data is not in right format: {request.data}"
         )
     app.logger.debug(f"to database media {media_id} {mimetype}")

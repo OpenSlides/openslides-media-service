@@ -47,7 +47,7 @@ def test_mediaservice_post_not_base64_file():
         "mimetype": "text/plain",
     }
     req = requests.post(POST_URL, json=payload)
-    assert req.status_code == 500
+    assert req.status_code == 400
 
 
 def test_mediaservice_post_broken_id():
@@ -57,7 +57,7 @@ def test_mediaservice_post_broken_id():
         "mimetype": "text/plain",
     }
     req = requests.post(POST_URL, json=payload)
-    assert req.status_code == 500
+    assert req.status_code == 400
 
 
 def test_mediaservice_missing_mimetype():
@@ -66,4 +66,4 @@ def test_mediaservice_missing_mimetype():
         "id": 6,
     }
     req = requests.post(POST_URL, json=payload)
-    assert req.status_code == 500
+    assert req.status_code == 400
