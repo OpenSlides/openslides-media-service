@@ -1,4 +1,5 @@
 import atexit
+import json
 
 from flask import Flask, Response, request
 
@@ -22,7 +23,8 @@ def handle_view_error(error):
         f"Request to {request.path} resulted in {error.status_code}: "
         f"{error.message}"
     )
-    return f"Media-Server: {error.message}", error.status_code
+    res_content = {"message": f"Media-Server: {error.message}"}
+    return json.dumps(res_content), error.status_code
 
 
 @app.route("/system/media/get/<int:meeting_id>/<path:path>")
