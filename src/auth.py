@@ -3,7 +3,7 @@ import requests
 from .exceptions import NotFoundError, ServerError
 
 
-def get_mediafile_id(meeting_id, path, app, cookie):
+def get_mediafile_id(meeting_id, path, app, presenter_headers):
     presenter_url = get_presenter_url(app, meeting_id, path)
     app.logger.debug(f"Send check request: {presenter_url}")
     payload = [
@@ -14,9 +14,7 @@ def get_mediafile_id(meeting_id, path, app, cookie):
     ]
 
     try:
-        response = requests.post(
-            presenter_url, headers={"Cookie": cookie}, json=payload
-        )
+        response = requests.post(presenter_url, headers=presenter_headers, json=payload)
     except requests.exceptions.ConnectionError as e:
         app.logger.error(str(e))
         raise ServerError("The server didn't respond")

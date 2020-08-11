@@ -31,8 +31,11 @@ def serve(meeting_id, path):
         raise NotFoundError()
 
     # get mediafile id
-    cookie = request.headers.get("Cookie", "")
-    media_id = get_mediafile_id(meeting_id, path, app, cookie)
+    presenter_headers = dict(request.headers)
+    del_keys = [key for key in presenter_headers if "content" in key]
+    for key in del_keys:
+        del presenter_headers[key]
+    media_id = get_mediafile_id(meeting_id, path, app, presenter_headers)
     app.logger.debug(f'Id for "{path}" and "{meeting_id}" is {media_id}')
 
     # Query file from db
