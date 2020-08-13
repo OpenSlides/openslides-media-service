@@ -24,7 +24,8 @@ def handle_view_error(error):
         f"Request to {request.path} resulted in {error.status_code}: "
         f"{error.message}"
     )
-    return f"Media-Server: {error.message}", error.status_code
+    res_content = {"message": f"Media-Server: {error.message}"}
+    return json.dumps(res_content), error.status_code
 
 
 @app.route("/system/media/get/<int:meeting_id>/<path:path>")
@@ -33,8 +34,11 @@ def serve(meeting_id, path):
         raise NotFoundError()
 
     # get mediafile id
-    cookie = request.headers.get("Cookie", "")
-    media_id = get_mediafile_id(meeting_id, path, app, cookie)
+    presenter_headers = dict(request.headers)
+    del_keys = [key for key in presenter_headers if "content" in key]
+    for key in del_keys:
+        del presenter_headers[key]
+    media_id = get_mediafile_id(meeting_id, path, app, presenter_headers)
     app.logger.debug(f'Id for "{path}" and "{meeting_id}" is {media_id}')
 
     # Query file from db
@@ -72,14 +76,6 @@ def media_post():
     global database
     database.set_mediafile(media_id, media, mimetype)
     return f"Mediaserver: add {media_id} to db", 200
-
-
-# for testing
-@app.route("/system/presenter", methods=["POST"])
-def dummy_presenter():
-    app.logger.debug(f"dummy_presenter gets: {request.json}")
-    meeting_id = request.json[0]["data"]["meeting_id"]
-    return f"[{meeting_id}]"
 
 
 def shutdown(database):

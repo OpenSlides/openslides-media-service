@@ -18,11 +18,19 @@ def test_mediaservice_positiv():
 def test_mediaservice_not_found():
     req = requests.get(GET_URL + "4/test")
     assert req.status_code == 500
+    assert (
+        req.json()["message"]
+        == "Media-Server: The mediafile with id 4 could not be found."
+    )
 
 
 def test_mediaservice_auth_problem():
     req = requests.get(GET_URL + "12/test")
-    assert req.status_code == 500
+    assert req.status_code == 404
+    assert (
+        req.json()["message"]
+        == "Media-Server: The Response did not contain a valid id."
+    )
 
 
 def test_mediaservice_post_good_test():
@@ -48,6 +56,10 @@ def test_mediaservice_post_not_base64_file():
     }
     req = requests.post(POST_URL, json=payload)
     assert req.status_code == 400
+    assert (
+        req.json()["message"]
+        == "Media-Server: cannot decode base64 file"
+    )
 
 
 def test_mediaservice_post_broken_id():
@@ -58,7 +70,10 @@ def test_mediaservice_post_broken_id():
     }
     req = requests.post(POST_URL, json=payload)
     assert req.status_code == 400
-
+    assert (
+        req.json()["message"]
+        == "Media-Server: The post request.data is not in right format: b'{\"file\": \"dGVzdHRlc3R0ZXN0\", \"id\": \"XXX\", \"mimetype\": \"text/plain\"}'"
+    )
 
 def test_mediaservice_missing_mimetype():
     payload = {
@@ -67,3 +82,18 @@ def test_mediaservice_missing_mimetype():
     }
     req = requests.post(POST_URL, json=payload)
     assert req.status_code == 400
+    req = requests.get("http://media:9006/system/media/get/12/fail")
+    assert req.status_code == 404
+    assert (
+        req.json()["message"]
+        == "Media-Server: The Response did not contain a valid id."
+    )
+
+
+def test_mediaservice_auth_problem2():
+    req = requests.get("http://media:9006/system/media/get/13/fail")
+    assert req.status_code == 500
+    assert (
+        req.json()["message"]
+        == "Media-Server: The server responded with an unexpected code 500: b'XXX'"
+    )
