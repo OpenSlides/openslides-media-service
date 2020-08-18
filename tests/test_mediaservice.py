@@ -56,10 +56,7 @@ def test_mediaservice_post_not_base64_file():
     }
     req = requests.post(POST_URL, json=payload)
     assert req.status_code == 400
-    assert (
-        req.json()["message"]
-        == "Media-Server: cannot decode base64 file"
-    )
+    assert req.json()["message"] == "Media-Server: cannot decode base64 file"
 
 
 def test_mediaservice_post_broken_id():
@@ -70,10 +67,11 @@ def test_mediaservice_post_broken_id():
     }
     req = requests.post(POST_URL, json=payload)
     assert req.status_code == 400
-    assert (
-        req.json()["message"]
-        == "Media-Server: The post request.data is not in right format: b'{\"file\": \"dGVzdHRlc3R0ZXN0\", \"id\": \"XXX\", \"mimetype\": \"text/plain\"}'"
+    assert req.json()["message"] == (
+        "Media-Server: The post request.data is not in right format: "
+        'b\'{"file": "dGVzdHRlc3R0ZXN0", "id": "XXX", "mimetype": "text/plain"}\''
     )
+
 
 def test_mediaservice_missing_mimetype():
     payload = {
