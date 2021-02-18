@@ -77,6 +77,25 @@ def handle_view_error(error):
     )
     return f"Media-Server: {error.message}", error.status_code
 
+# create 10 MB of dummy data
+DATA_10MB = os.urandom(10*1024*1024)
+
+@app.route(f"{app.config['URL_PREFIX']}/test.bin")
+def serve_test():
+    app.logger.debug("Sending debug test.bin")
+
+    def send1GB(block_size):
+        for _ in range(100):
+            yield from chunked(block_size, DATA_10MB)
+
+    # Send data (chunked)
+    def chunked(block_size, source):
+        for i in range(0, len(source), block_size):
+            yield bytes(source[i : i + block_size])  # noqa
+
+    block_size = app.config["BLOCK_SIZE"]
+    return Response(send1GB(block_size), mimetype="application/octet-stream")
+
 
 @app.route(app.config["URL_PREFIX"], defaults={"path": ""})
 @app.route(f"{app.config['URL_PREFIX']}<path:path>")
