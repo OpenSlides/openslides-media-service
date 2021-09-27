@@ -11,7 +11,7 @@ GET_URL = "http://media:9006/system/media/get_resource/"
 
 @pytest.fixture(autouse=True)
 def reset_db():
-    """ Deletes all mediafiles except for id=2 and id=3 (example data) """
+    """Deletes all mediafiles except for id=2 and id=3 (example data)"""
     conn = psycopg2.connect(
         host="media-postgresql",
         port=5432,
