@@ -104,6 +104,29 @@ def file_post(file_type):
     return "", 200
 
 
+@app.route("/internal/media/duplicate_mediafile/", methods=["POST"])
+def duplicate_mediafile():
+    try:
+        decoded = request.data.decode()
+        dejson = json.loads(decoded)
+    except Exception:
+        raise BadRequestError("request.data is not json")
+    try:
+        source_id = int(dejson["source_id"])
+        target_id = int(dejson["target_id"])
+    except Exception:
+        raise BadRequestError(
+            f"The post request.data is not in right format: {request.data}"
+        )
+    app.logger.debug(f"source_id {source_id} and target_id {target_id}")
+    global database
+    # Query file source_id from db
+    data, mimetype = database.get_file(source_id, "mediafile")
+    # Insert mediafile in target_id into db
+    database.set_mediafile(target_id, "mediafile", data, mimetype)
+    return "", 200
+
+
 def shutdown(database):
     app.logger.info("Stopping the server...")
     database.shutdown()
