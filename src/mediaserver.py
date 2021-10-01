@@ -102,14 +102,7 @@ def file_post(file_type):
 
 @app.route("/internal/media/duplicate_mediafile/", methods=["POST"])
 def duplicate_mediafile():
-    dejson = get_json_from_request()
-    try:
-        source_id = int(dejson["source_id"])
-        target_id = int(dejson["target_id"])
-    except Exception:
-        raise BadRequestError(
-            f"The post request.data is not in right format: {request.data}"
-        )
+    source_id, target_id = get_ids(get_json_from_request())
     app.logger.debug(f"source_id {source_id} and target_id {target_id}")
     global database
     # Query file source_id from db
@@ -126,6 +119,17 @@ def get_json_from_request():
         return dejson
     except Exception:
         raise BadRequestError("request.data is not json")
+
+
+def get_ids(dejson):
+    try:
+        source_id = int(dejson["source_id"])
+        target_id = int(dejson["target_id"])
+    except Exception:
+        raise BadRequestError(
+            f"The post request.data is not in right format: {request.data}"
+        )
+    return source_id, target_id
 
 
 def shutdown(database):
