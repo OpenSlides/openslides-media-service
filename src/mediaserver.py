@@ -82,11 +82,7 @@ def resource_post():
 
 
 def file_post(file_type):
-    try:
-        decoded = request.data.decode()
-        dejson = json.loads(decoded)
-    except Exception:
-        raise BadRequestError("request.data is not json")
+    dejson = get_json_from_request()
     try:
         file_data = base64.b64decode(dejson["file"].encode())
     except Exception:
@@ -106,11 +102,7 @@ def file_post(file_type):
 
 @app.route("/internal/media/duplicate_mediafile/", methods=["POST"])
 def duplicate_mediafile():
-    try:
-        decoded = request.data.decode()
-        dejson = json.loads(decoded)
-    except Exception:
-        raise BadRequestError("request.data is not json")
+    dejson = get_json_from_request()
     try:
         source_id = int(dejson["source_id"])
         target_id = int(dejson["target_id"])
@@ -125,6 +117,15 @@ def duplicate_mediafile():
     # Insert mediafile in target_id into db
     database.set_mediafile(target_id, "mediafile", data, mimetype)
     return "", 200
+
+
+def get_json_from_request():
+    try:
+        decoded = request.data.decode()
+        dejson = json.loads(decoded)
+        return dejson
+    except Exception:
+        raise BadRequestError("request.data is not json")
 
 
 def shutdown(database):
