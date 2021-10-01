@@ -17,6 +17,13 @@ def check_response(response, status_code):
     assert "message" in response.json()
 
 
+def check_saved_content(id_, content, mimetype):
+    get_response = requests.get(GET_URL + str(id_))
+    assert get_response.status_code == 200
+    assert get_response.content == content
+    assert mimetype in get_response.headers.get("Content-Type")
+
+
 def test_good():
     payload = {
         "source_id": 2,
@@ -25,11 +32,7 @@ def test_good():
     response = requests.post(DUPLICATE_URL, json=payload)
     assert response.status_code == 200
     assert response.text == ""
-
-    get_response = requests.get(GET_URL + "5")
-    assert get_response.status_code == 200
-    assert get_response.content == b"a2"
-    assert "text/plain" in get_response.headers.get("Content-Type")
+    check_saved_content(5, b"a2", "text/plain")
 
 
 def test_broken_source():
