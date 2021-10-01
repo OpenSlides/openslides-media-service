@@ -12,6 +12,11 @@ def reset_db_in_duplicate_mediafile():
     reset_db()
 
 
+def check_response(response, status_code):
+    assert response.status_code == status_code
+    assert "message" in response.json()
+
+
 def test_good():
     payload = {
         "source_id": 2,
@@ -33,8 +38,7 @@ def test_broken_source():
         "target_id": 5,
     }
     response = requests.post(DUPLICATE_URL, json=payload)
-    assert response.status_code == 500
-    assert "message" in response.json()
+    check_response(response, 500)
 
 
 def test_broken_target():
@@ -43,12 +47,10 @@ def test_broken_target():
         "target_id": 3,
     }
     response = requests.post(DUPLICATE_URL, json=payload)
-    assert response.status_code == 500
-    assert "message" in response.json()
+    check_response(response, 500)
 
 
 def test_empty():
     payload = {}
     response = requests.post(DUPLICATE_URL, json=payload)
-    assert response.status_code == 400
-    assert "message" in response.json()
+    check_response(response, 400)
