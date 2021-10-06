@@ -9,7 +9,6 @@ COPY requirements_production.txt .
 COPY requirements_development.txt .
 RUN pip install -r requirements_development.txt
 
-COPY src/* src/
 COPY entrypoint.sh .
 COPY entrypoint.dev.sh .
 COPY execute-cleanup.sh .
