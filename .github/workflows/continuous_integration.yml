@@ -1,0 +1,16 @@
+name: Continuous Integration
+
+on:
+  pull_request:
+    branches: [ openslides4-dev ]
+
+jobs:
+  tests:
+    name: "Tests"
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Run tests
+      run: make run-tests
+    - name: Stop containers
+      run: make stop-tests
