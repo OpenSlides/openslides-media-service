@@ -1,8 +1,6 @@
 name: Continuous Integration
 
-on:
-  pull_request:
-    branches: [ openslides4-dev ]
+on: [ push, pull-request ]
 
 jobs:
   tests:
