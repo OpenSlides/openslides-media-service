@@ -4,6 +4,10 @@ import requests
 GET_URL = "http://media:9006/system/media/get/"
 
 
+def test_broken():
+    assert 1 == 0
+
+
 def test_positiv():
     # wait the service to start
     req = requests.get(GET_URL + "2")
