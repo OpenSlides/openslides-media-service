@@ -17,6 +17,7 @@ services:
             - PRESENTER_HOST=dummy_presenter
             - PRESENTER_PORT=9003
             - MEDIA_ENABLE_DEV_ENVIRONMENT=1
+            - MEDIA_ADD_TEST_FILES=1
         volumes:
             - ./src:/app/src
         ports:
