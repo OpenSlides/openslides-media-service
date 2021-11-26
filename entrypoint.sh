@@ -1,6 +1,7 @@
 #!/bin/bash
 set -e
 
+# Please also change the entrypoint.dev.sh if you change this.
 export MEDIA_DATABASE_HOST="${MEDIA_DATABASE_HOST:-db}"
 export MEDIA_DATABASE_PORT="${MEDIA_DATABASE_PORT:-5432}"
 export MEDIA_DATABASE_NAME="${MEDIA_DATABASE_NAME:-mediafiledata}"
