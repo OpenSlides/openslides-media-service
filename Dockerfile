@@ -11,6 +11,7 @@ RUN pip install -r requirements_production.txt
 
 COPY src/* src/
 COPY entrypoint.sh .
+COPY scripts/service_env.sh scripts/
 
 EXPOSE 9006
 ENTRYPOINT ["./entrypoint.sh"]

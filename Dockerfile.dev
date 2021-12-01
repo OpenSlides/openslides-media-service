@@ -13,6 +13,7 @@ COPY entrypoint.sh .
 COPY entrypoint.dev.sh .
 COPY execute-cleanup.sh .
 COPY setup.cfg .
+COPY scripts/service_env.sh scripts/
 
 EXPOSE 9006
 
