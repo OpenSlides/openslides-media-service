@@ -11,8 +11,6 @@ def dummy_presenter():
     app.logger.debug(f"dummy_presenter gets: {request.json}")
     if request.json[0]["presenter"] == "check_mediafile_id":
         file_id = request.json[0]["data"]["mediafile_id"]
-    elif request.json[0]["presenter"] == "check_resource_id":
-        file_id = request.json[0]["data"]["resource_id"]
 
     # Valid response from presenter, but not found in DB
     if file_id == 1:
