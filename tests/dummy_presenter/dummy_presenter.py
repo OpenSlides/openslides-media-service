@@ -41,3 +41,6 @@ def dummy_presenter():
     # not found or no perms
     if file_id == 20:
         return jsonify([{"ok": False}])
+
+    # for linked_id tests
+    return jsonify([{"ok": True, "filename": str(file_id)}])

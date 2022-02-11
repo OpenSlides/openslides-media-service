@@ -4,5 +4,7 @@ CREATE SCHEMA IF NOT EXISTS media;
 CREATE TABLE IF NOT EXISTS media.mediafile_data (
     id int PRIMARY KEY,
     data bytea,
-    mimetype varchar(255)
+    mimetype varchar(255),
+    hash varchar(256),
+    linked_id int
 );

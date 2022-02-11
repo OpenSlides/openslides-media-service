@@ -1,6 +1,18 @@
 import psycopg2
 
 
+def query_db(media_id):
+    """Query mediafile with id "media_id"."""
+    conn = get_connection()
+    with conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT id, data, mimetype, hash, linked_id FROM  media.mediafile_data WHERE id=%s",
+                [media_id],
+            )
+            return cur.fetchone()
+
+
 def reset_db():
     """Deletes all mediafiles except for id=2 and id=3 (example data)"""
     conn = get_connection()

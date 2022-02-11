@@ -1,3 +1,5 @@
+import hashlib
+
 import psycopg2
 
 from .cache import LRUCache
@@ -11,6 +13,9 @@ class Database:
         self.connection = None
         self.cache_mediafile = LRUCache(self.logger, 20)
 
+    def get_hash(self, media):
+        return hashlib.sha256(bytes(media)).hexdigest()
+
     def get_file(self, file_id):
         if self.cache_mediafile.has_media_id(file_id):
             return self.cache_mediafile.get_media(file_id)
@@ -18,9 +23,11 @@ class Database:
             connection = self.get_connection()
             try:
                 with connection:
-                    media = self._query(connection, file_id)
-                    self.cache_mediafile.set_media(file_id, media)
-                    return media
+                    media, mimetype, linked_id = self._query(connection, file_id)
+                    if linked_id:
+                        media, mimetype, _ = self._query(connection, linked_id)
+                    self.cache_mediafile.set_media(file_id, (media, mimetype))
+                    return (media, mimetype)
             except psycopg2.InterfaceError:
                 if self.connection:
                     self.connection.close()
@@ -32,21 +39,28 @@ class Database:
 
     def _query(self, connection, file_id):
         with connection.cursor() as cur:
-            fetch_query = "SELECT data, mimetype FROM media.mediafile_data WHERE id=%s"
+            fetch_query = (
+                "SELECT data, mimetype, linked_id FROM media.mediafile_data WHERE id=%s"
+            )
             cur.execute(fetch_query, [file_id])
             row = cur.fetchone()
             if not row:
                 raise NotFoundError(
                     f"The mediafile with id {file_id} could not be found."
                 )
-            return (row[0], row[1])
+            return (row[0], row[1], row[2])
 
     def set_mediafile(self, file_id, media, mimetype):
         while True:
             try:
                 connection = self.get_connection()
                 with connection:
-                    self._insert(connection, file_id, media, mimetype)
+                    hash_ = self.get_hash(media)
+                    linked_id = self._query_for_hash(connection, hash_)
+                    if linked_id:
+                        self._insert_link(connection, file_id, linked_id)
+                    else:
+                        self._insert(connection, file_id, media, mimetype, hash_)
                 break
             except psycopg2.InterfaceError:
                 if self.connection:
@@ -57,17 +71,34 @@ class Database:
                 self.logger.error(f"Error during inserting a mediafile: {repr(e)}")
                 raise ServerError(f"Database error {e.pgcode}: {e.pgerror}")
 
-    def _insert(self, connection, file_id, media, mimetype):
+    def _query_for_hash(self, connection, hash_):
+        with connection.cursor() as cur:
+            fetch_query = "SELECT id FROM media.mediafile_data WHERE hash=%s"
+            cur.execute(fetch_query, [hash_])
+            row = cur.fetchone()
+            if not row:
+                return None
+            return row[0]
+
+    def _insert(self, connection, file_id, media, mimetype, hash_):
         insert_sql = (
-            "INSERT INTO media.mediafile_data (id, data, mimetype) "
-            " VALUES (%s, %s, %s)"
+            "INSERT INTO media.mediafile_data (id, data, mimetype, hash) "
+            " VALUES (%s, %s, %s, %s)"
         )
 
         with connection.cursor() as cur:
             cur.execute(
                 insert_sql,
-                (file_id, media, mimetype),
+                (file_id, media, mimetype, hash_),
             )
+
+    def _insert_link(self, connection, file_id, linked_id):
+        insert_sql = (
+            "INSERT INTO media.mediafile_data (id, linked_id) " " VALUES (%s, %s)"
+        )
+
+        with connection.cursor() as cur:
+            cur.execute(insert_sql, (file_id, linked_id))
 
     def get_connection(self):
         if not self.connection:
