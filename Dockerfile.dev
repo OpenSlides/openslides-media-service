@@ -1,4 +1,4 @@
-FROM python:3.8.1
+FROM python:3.8.13
 
 RUN apt-get -y update && apt-get install --no-install-recommends -y \
     postgresql-client
