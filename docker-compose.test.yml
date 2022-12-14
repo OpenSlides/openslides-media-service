@@ -20,6 +20,8 @@ services:
             - ./tests/dummy_presenter:/app/dummy_presenter
     tests:
         image: openslides-media-tests
+        environment:
+            - OPENSLIDES_DEVELOPMENT=1
         depends_on:
             - media
             - postgres
