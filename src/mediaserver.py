@@ -68,7 +68,11 @@ def serve_files(file_id, file_type):
     # http headers can only be encoded using latin1
     filename_latin1 = filename.encode("latin1", errors="replace").decode("latin1")
     response.headers["Content-Disposition"] = f'inline; filename="{filename_latin1}"'
-    response.headers["Cache-Control"] = "private, max-age=86400"
+
+    client_cache_duration = int(app.config["MEDIA_CLIENT_CACHE_DURATION"])
+    if client_cache_duration > 0:
+        response.headers["Cache-Control"] = f"private, max-age={client_cache_duration}"
+
     if auth_header:
         response.headers[AUTH_HEADER] = auth_header
     return response
