@@ -70,7 +70,7 @@ def serve_files(file_id, file_type):
     response.headers["Content-Disposition"] = f'inline; filename="{filename_latin1}"'
 
     client_cache_duration = int(app.config["MEDIA_CLIENT_CACHE_DURATION"])
-    if client_cache_duration > 0:
+    if client_cache_duration > 0 and not app.config("DEBUG"):
         response.headers["Cache-Control"] = f"private, max-age={client_cache_duration}"
 
     if auth_header:
