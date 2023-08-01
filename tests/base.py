@@ -1,6 +1,16 @@
+from os.path import join
+
+import jwt
 import psycopg2
+import pytest
+import requests
+from authlib import COOKIE_NAME
+from authlib.config import AUTH_DEV_COOKIE_SECRET
+
+GET_URL = "http://media:9006/system/media/get/"
 
 
+@pytest.fixture(autouse=True)
 def reset_db():
     """Deletes all mediafiles except for id=2 and id=3 (example data)"""
     conn = get_connection()
@@ -17,3 +27,10 @@ def get_connection():
         user="openslides",
         password="openslides",
     )
+
+
+def get_mediafile(id):
+    # dummy cookie for testing
+    token = jwt.encode({"userId": 1}, AUTH_DEV_COOKIE_SECRET)
+    cookie = f"bearer {token}"
+    return requests.get(join(GET_URL, str(id)), cookies={COOKIE_NAME: cookie})
