@@ -14,6 +14,8 @@ COPY src/* src/
 COPY scripts/entrypoint.sh .
 COPY scripts/service_env.sh scripts/
 
+RUN chmod 777 -R .
+
 STOPSIGNAL SIGKILL
 ENTRYPOINT ["./entrypoint.sh"]
 CMD ["sleep", "inf"]

@@ -14,6 +14,8 @@ COPY scripts/execute-cleanup.sh .
 COPY setup.cfg .
 COPY scripts/service_env.sh scripts/
 
+RUN chmod 777 -R .
+
 EXPOSE 9006
 
 ENTRYPOINT ["./entrypoint.sh"]
