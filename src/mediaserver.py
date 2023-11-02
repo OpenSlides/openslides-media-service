@@ -2,7 +2,6 @@ import atexit
 import base64
 import json
 import sys
-from functools import partial
 from signal import SIGINT, SIGTERM, signal
 
 from flask import Flask, Response, jsonify, redirect, request
