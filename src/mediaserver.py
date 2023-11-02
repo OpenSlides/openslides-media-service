@@ -135,4 +135,4 @@ def shutdown(database):
 atexit.register(shutdown, database)
 
 for sig in (SIGTERM, SIGINT):
-    signal(sig, partial(sys.exit, 0))
+    signal(sig, lambda *_: sys.exit(0))
