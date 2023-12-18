@@ -14,7 +14,7 @@ start-test-setup: | build-dev build-tests build-dummy-presenter
 run-tests: | start-test-setup
 	docker-compose -f docker-compose.test.yml exec -T tests pytest
 
-run-tests-interactive: | start-test-setup
+run-dev run-bash: | start-test-setup
 	docker-compose -f docker-compose.test.yml exec tests bash
 
 check-black:

@@ -8,6 +8,8 @@ services:
             - MEDIA_DATABASE_NAME=openslides
             - PRESENTER_HOST=dummy_presenter
             - PRESENTER_PORT=9003
+            - MESSAGE_BUS_HOST=redis
+            - CACHE_HOST=redis
             - OPENSLIDES_DEVELOPMENT=1
             - MEDIA_ADD_TEST_FILES=1
         volumes:
@@ -34,3 +36,7 @@ services:
             - POSTGRES_USER=openslides
             - POSTGRES_PASSWORD=openslides
             - POSTGRES_DB=openslides
+    redis:
+        image: redis:alpine
+        ports:
+            - "6379:6379"

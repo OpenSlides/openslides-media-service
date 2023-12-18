@@ -1,6 +1,8 @@
 #!/bin/bash
 
-printf "Black:\n"
+printf "Autoflake:\n"
+autoflake --verbose --in-place --remove-all-unused-imports --ignore-init-module-imports --recursive src/ tests/
+printf "\nBlack:\n"
 black src/ tests/
 printf "\nIsort:\n"
 isort src/ tests/
