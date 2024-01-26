@@ -1,6 +1,6 @@
 -r requirements_production.txt
 
 autoflake==2.2.1
-black==23.12.1
+black==24.1.0
 flake8==7.0.0
 isort==5.13.1
