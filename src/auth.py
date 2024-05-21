@@ -19,7 +19,7 @@ def check_login_valid():
     auth_handler = AuthHandler(app.logger.debug)
     cookie = request.cookies.get(COOKIE_NAME, "")
     try:
-        user_id = auth_handler.authenticate_only_refresh_id(parse.unquote(cookie))
+        auth_handler.authenticate_only_refresh_id(parse.unquote(cookie))
     except (AuthenticateException, InvalidCredentialsException):
         return False
     return True
