@@ -6,7 +6,7 @@ from signal import SIGINT, SIGTERM, signal
 
 from flask import Flask, Response, jsonify, redirect, request
 
-from .auth import AUTHENTICATION_HEADER, check_file_id, check_login
+from .auth import AUTHENTICATION_HEADER, check_file_id, check_login_valid
 from .config_handling import init_config, is_dev_mode
 from .database import Database
 from .exceptions import BadRequestError, HttpError, NotFoundError
@@ -35,7 +35,7 @@ def handle_view_error(error):
 
 @app.route("/system/media/get/<int:file_id>")
 def serve(file_id):
-    if not check_login():
+    if not check_login_valid():
         return redirect("/")
 
     # get file id
