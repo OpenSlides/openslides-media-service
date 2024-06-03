@@ -4,4 +4,4 @@ psycopg2==2.9.9
 requests==2.32.3
 
 # authlib
-git+https://github.com/OpenSlides/openslides-auth-service.git@8d7f460895da0127dead85fe758a0cb1f9087a34#egg=authlib&subdirectory=auth/libraries/pip-auth
+git+https://github.com/OpenSlides/openslides-auth-service.git@6548f50ca778ab4f27e530886080f1482681929d#egg=authlib&subdirectory=auth/libraries/pip-auth
