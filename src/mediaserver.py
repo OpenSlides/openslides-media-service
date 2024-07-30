@@ -39,11 +39,11 @@ def serve(file_id):
         return redirect("/")
 
     # get file id
-    presenter_headers = dict(request.headers)
-    del_keys = [key for key in presenter_headers if "content" in key]
+    autoupdate_headers = dict(request.headers)
+    del_keys = [key for key in autoupdate_headers if "content" in key]
     for key in del_keys:
-        del presenter_headers[key]
-    ok, filename, auth_header = check_file_id(file_id, presenter_headers)
+        del autoupdate_headers[key]
+    ok, filename, auth_header = check_file_id(file_id, autoupdate_headers)
     if not ok:
         raise NotFoundError()
 

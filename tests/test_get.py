@@ -21,7 +21,7 @@ def test_invalid_responses():
         assert "message" in response.json()
 
 
-def test_not_ok_from_presenter():
+def test_not_ok_from_autoupdate():
     response = get_mediafile(20)
     assert response.status_code == 404
     assert "message" in response.json()
