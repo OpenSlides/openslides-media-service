@@ -14,8 +14,8 @@ CONFIG_DEFAULTS = {
     "MEDIA_DATABASE_PASSWORD_FILE": "/run/secrets/postgres_password",
     "MEDIA_BLOCK_SIZE": 4096,
     "MEDIA_CLIENT_CACHE_DURATION": 86400,
-    "PRESENTER_HOST": "backend",
-    "PRESENTER_PORT": 9003,
+    "AUTOUPDATE_HOST": "autoupdate",
+    "AUTOUPDATE_PORT": 9012,
 }
 
 

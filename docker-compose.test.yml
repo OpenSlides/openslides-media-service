@@ -6,8 +6,8 @@ services:
             - MEDIA_DATABASE_HOST=postgres
             - MEDIA_DATABASE_PORT=5432
             - MEDIA_DATABASE_NAME=openslides
-            - PRESENTER_HOST=dummy_presenter
-            - PRESENTER_PORT=9003
+            - AUTOUPDATE_HOST=dummy_autoupdate
+            - AUTOUPDATE_PORT=9012
             - MESSAGE_BUS_HOST=redis
             - CACHE_HOST=redis
             - OPENSLIDES_DEVELOPMENT=1

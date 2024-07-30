@@ -26,18 +26,25 @@ def check_login():
     return user_id != ANONYMOUS_USER
 
 
-def check_file_id(file_id, presenter_headers):
+def check_file_id(file_id, autoupdate_headers):
     """
     Returns a triple: ok, filename, auth_header.
     filename is given, if ok=True. If ok=false, the user has no perms.
     if auth_header is returned, it must be set in the response.
     """
-    presenter_url = get_presenter_url()
-    payload = [{"presenter": "check_mediafile_id", "data": {"mediafile_id": file_id}}]
-    app.logger.debug(f"Send check request: {presenter_url}: {payload}")
+    auth_handler = AuthHandler(app.logger.debug)
+    cookie = request.cookies.get(COOKIE_NAME, "")
+    try:
+        user_id = auth_handler.authenticate_only_refresh_id(parse.unquote(cookie))
+    except (AuthenticateException, InvalidCredentialsException):
+        raise ServerError("Could not parse auth cookie")
+
+    autoupdate_url = get_autoupdate_url(user_id)
+    payload = [{"collection": "mediafile", "fields": {"id": None, "filename": None}, "ids": [file_id]}]
+    app.logger.debug(f"Send check request: {autoupdate_url}: {payload}")
 
     try:
-        response = requests.post(presenter_url, headers=presenter_headers, json=payload)
+        response = requests.post(autoupdate_url, headers=autoupdate_headers, json=payload)
     except requests.exceptions.ConnectionError as e:
         app.logger.error(str(e))
         raise ServerError("The server didn't respond")
@@ -54,24 +61,21 @@ def check_file_id(file_id, presenter_headers):
         content = response.json()
     except ValueError:
         raise ServerError("The Response does not contain valid JSON.")
-    if not isinstance(content, list) or len(content) != 1:
-        raise ServerError("The returned json is not a list of length 1.")
-    content = content[0]
     if not isinstance(content, dict):
         raise ServerError("The returned content is not a dict.")
 
     auth_header = response.headers.get(AUTHENTICATION_HEADER)
 
-    if not content.get("ok", False):
+    if content[f"mediafile/{file_id}/id"] != file_id:
         return False, None, auth_header
 
-    if "filename" not in content:
-        raise ServerError("The presenter did not provide a filename")
+    if f"mediafile/{file_id}/filename" not in content:
+        raise ServerError("The autoupdate did not provide a filename")
 
-    return True, content["filename"], auth_header
+    return True, content[f"mediafile/{file_id}/filename"], auth_header
 
 
-def get_presenter_url():
-    presenter_host = app.config["PRESENTER_HOST"]
-    presenter_port = app.config["PRESENTER_PORT"]
-    return f"http://{presenter_host}:{presenter_port}/system/presenter/handle_request"
+def get_autoupdate_url(user_id):
+    autoupdate_host = app.config["AUTOUPDATE_HOST"]
+    autoupdate_port = app.config["AUTOUPDATE_PORT"]
+    return f"http://{autoupdate_host}:{autoupdate_port}/internal/autoupdate?user_id={user_id}&single=1"
