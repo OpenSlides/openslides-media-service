@@ -40,11 +40,19 @@ def check_file_id(file_id, autoupdate_headers):
         raise ServerError("Could not parse auth cookie")
 
     autoupdate_url = get_autoupdate_url(user_id)
-    payload = [{"collection": "mediafile", "fields": {"id": None, "filename": None}, "ids": [file_id]}]
+    payload = [
+        {
+            "collection": "mediafile",
+            "fields": {"id": None, "filename": None},
+            "ids": [file_id],
+        }
+    ]
     app.logger.debug(f"Send check request: {autoupdate_url}: {payload}")
 
     try:
-        response = requests.post(autoupdate_url, headers=autoupdate_headers, json=payload)
+        response = requests.post(
+            autoupdate_url, headers=autoupdate_headers, json=payload
+        )
     except requests.exceptions.ConnectionError as e:
         app.logger.error(str(e))
         raise ServerError("The server didn't respond")
@@ -66,7 +74,10 @@ def check_file_id(file_id, autoupdate_headers):
 
     auth_header = response.headers.get(AUTHENTICATION_HEADER)
 
-    if f"mediafile/{file_id}/id" not in content or content[f"mediafile/{file_id}/id"] != file_id:
+    if (
+        f"mediafile/{file_id}/id" not in content
+        or content[f"mediafile/{file_id}/id"] != file_id
+    ):
         return False, None, auth_header
 
     if f"mediafile/{file_id}/filename" not in content:
