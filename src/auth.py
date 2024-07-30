@@ -66,7 +66,7 @@ def check_file_id(file_id, autoupdate_headers):
 
     auth_header = response.headers.get(AUTHENTICATION_HEADER)
 
-    if content[f"mediafile/{file_id}/id"] != file_id:
+    if f"mediafile/{file_id}/id" not in content or content[f"mediafile/{file_id}/id"] != file_id:
         return False, None, auth_header
 
     if f"mediafile/{file_id}/filename" not in content:
