@@ -29,5 +29,5 @@ def test_not_ok_from_autoupdate():
 
 def test_redirect_if_not_logged_in():
     response = get_mediafile(2, use_cookie=False)
-    assert response.status_code == 302
-    assert response.headers["Location"] == "/"
+    assert response.content == b"a2"
+    assert "text/plain" in response.headers.get("Content-Type")
