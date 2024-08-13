@@ -12,8 +12,8 @@ Delivers media files for OpenSlides. It stores the data in the database.
 password (default: `/run/secrets/postgres_password`; in dev mode the password is always assumed to be `openslides`)
 - `MEDIA_BLOCK_SIZE`: The size of the blocks, the file is chunked into (default: `4096`)
 - `MEDIA_CLIENT_CACHE_DURATION`: The duration in seconds a file should be cached by a client (default: `86400`; disabled when: `0`)
-- `PRESENTER_HOST`: Host of the presenter service (default: `backend`)
-- `PRESENTER_PORT`: Port of the presenter service (default: `9003`)
+- `AUTOUPDATE_HOST`: Host of the autoupdate service (default: `autoupdate`)
+- `AUTOUPDATE_PORT`: Port of the autoupdate service (default: `9012`)
 
 ## Production setup
 Use the provided Dockerfile. It creates the tables in Postgresql, if they don't

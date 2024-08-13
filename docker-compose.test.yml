@@ -6,8 +6,8 @@ services:
             - MEDIA_DATABASE_HOST=postgres
             - MEDIA_DATABASE_PORT=5432
             - MEDIA_DATABASE_NAME=openslides
-            - PRESENTER_HOST=dummy_presenter
-            - PRESENTER_PORT=9003
+            - AUTOUPDATE_HOST=dummy_autoupdate
+            - AUTOUPDATE_PORT=9012
             - MESSAGE_BUS_HOST=redis
             - CACHE_HOST=redis
             - OPENSLIDES_DEVELOPMENT=1
@@ -16,10 +16,10 @@ services:
             - ./src:/app/src
         ports:
             - 9006:9006
-    dummy_presenter:
-        image: openslides-media-dummy-presenter
+    dummy_autoupdate:
+        image: openslides-media-dummy-autoupdate
         volumes:
-            - ./tests/dummy_presenter:/app/dummy_presenter
+            - ./tests/dummy_autoupdate:/app/dummy_autoupdate
     tests:
         image: openslides-media-tests
         environment:
@@ -27,7 +27,7 @@ services:
         depends_on:
             - media
             - postgres
-            - dummy_presenter
+            - dummy_autoupdate
         volumes:
             - ./tests:/app/tests
     postgres:
