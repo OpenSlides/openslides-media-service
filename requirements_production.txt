@@ -1,7 +1,4 @@
-Flask==3.0.3
-gunicorn==23.0.0
-psycopg2==2.9.9
-requests==2.32.3
+-r requirements_production.txt
 
 # authlib
 git+https://github.com/OpenSlides/openslides-auth-service.git@6548f50ca778ab4f27e530886080f1482681929d#egg=authlib&subdirectory=auth/libraries/pip-auth

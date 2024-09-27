@@ -1,27 +1,34 @@
 from urllib import parse
 
 import requests
-from authlib import (
+from flask import current_app as app
+from flask import request
+
+from os_authlib import (
     ANONYMOUS_USER,
     AUTHENTICATION_HEADER,
-    COOKIE_NAME,
     AuthenticateException,
     AuthHandler,
     InvalidCredentialsException,
 )
-from flask import current_app as app
-from flask import request
-
 from .exceptions import ServerError
+
+
+def get_user_id():
+    """Returns the user id from the auth cookie."""
+    auth_handler = AuthHandler(app.logger.debug)
+    authentication = request.headers.get(AUTHENTICATION_HEADER, "")
+    try:
+        (user_id, _) = auth_handler.authenticate(authentication)
+    except (AuthenticateException, InvalidCredentialsException):
+        return -1
+    return user_id
 
 
 def check_login():
     """Returns whether the user is logged in or not."""
-    auth_handler = AuthHandler(app.logger.debug)
-    cookie = request.cookies.get(COOKIE_NAME, "")
-    try:
-        user_id = auth_handler.authenticate_only_refresh_id(parse.unquote(cookie))
-    except (AuthenticateException, InvalidCredentialsException):
+    user_id = get_user_id()
+    if user_id == -1:
         return False
     return user_id != ANONYMOUS_USER
 
@@ -32,12 +39,9 @@ def check_file_id(file_id, autoupdate_headers):
     filename is given, if ok=True. If ok=false, the user has no perms.
     if auth_header is returned, it must be set in the response.
     """
-    auth_handler = AuthHandler(app.logger.debug)
-    cookie = request.cookies.get(COOKIE_NAME, "")
-    try:
-        user_id = auth_handler.authenticate_only_refresh_id(parse.unquote(cookie))
-    except (AuthenticateException, InvalidCredentialsException):
-        raise ServerError("Could not parse auth cookie")
+    user_id = get_user_id()
+    if user_id == -1:
+        raise ServerError("Could not find authentication")
 
     autoupdate_url = get_autoupdate_url(user_id)
     payload = [
@@ -75,8 +79,8 @@ def check_file_id(file_id, autoupdate_headers):
     auth_header = response.headers.get(AUTHENTICATION_HEADER)
 
     if (
-        f"mediafile/{file_id}/id" not in content
-        or content[f"mediafile/{file_id}/id"] != file_id
+            f"mediafile/{file_id}/id" not in content
+            or content[f"mediafile/{file_id}/id"] != file_id
     ):
         return False, None, auth_header
 

@@ -1,6 +1,9 @@
--r requirements_production.txt
+-r requirements_common.txt
 
 autoflake==2.3.1
 black==24.8.0
 flake8==7.1.1
 isort==5.13.2
+
+# authlib
+-e /pip-auth

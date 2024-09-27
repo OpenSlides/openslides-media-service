@@ -1,5 +1,8 @@
 build-dev:
+	rm -rf pip-auth
+	cp -r ../openslides-auth-service/libraries/pip-auth pip-auth
 	docker build . -f Dockerfile.dev --tag openslides-media-dev
+	rm -rf pip-auth
 
 build-tests:
 	docker build . -f Dockerfile.tests --tag openslides-media-tests

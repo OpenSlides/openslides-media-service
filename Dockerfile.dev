@@ -5,8 +5,8 @@ RUN apt-get -y update && apt-get install --no-install-recommends -y \
 
 WORKDIR /app
 
-COPY requirements_production.txt .
-COPY requirements_development.txt .
+COPY requirements_*.txt .
+COPY pip-auth /pip-auth
 RUN pip install -r requirements_development.txt
 
 COPY scripts/entrypoint.sh .
