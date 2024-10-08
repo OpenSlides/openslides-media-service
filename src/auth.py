@@ -2,7 +2,6 @@ from urllib import parse
 
 import requests
 from authlib import (
-    ANONYMOUS_USER,
     AUTHENTICATION_HEADER,
     COOKIE_NAME,
     AuthenticateException,
@@ -15,15 +14,15 @@ from flask import request
 from .exceptions import ServerError
 
 
-def check_login():
+def check_login_valid():
     """Returns whether the user is logged in or not."""
     auth_handler = AuthHandler(app.logger.debug)
     cookie = request.cookies.get(COOKIE_NAME, "")
     try:
-        user_id = auth_handler.authenticate_only_refresh_id(parse.unquote(cookie))
+        auth_handler.authenticate_only_refresh_id(parse.unquote(cookie))
     except (AuthenticateException, InvalidCredentialsException):
         return False
-    return user_id != ANONYMOUS_USER
+    return True
 
 
 def check_file_id(file_id, autoupdate_headers):
