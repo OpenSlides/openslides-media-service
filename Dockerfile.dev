@@ -1,13 +1,9 @@
-FROM python:3.10.15-slim-bookworm
+FROM python:3.10.15-slim-bookworm as base
 
 RUN apt-get -y update && apt-get install --no-install-recommends -y \
     postgresql-client libpq-dev gcc libc-dev git
 
 WORKDIR /app
-
-COPY requirements_production.txt .
-COPY requirements_development.txt .
-RUN pip install -r requirements_development.txt
 
 COPY scripts/entrypoint.sh .
 COPY scripts/execute-cleanup.sh .
@@ -20,3 +16,14 @@ EXPOSE 9006
 
 ENTRYPOINT ["./entrypoint.sh"]
 CMD exec flask --app src/mediaserver run --host 0.0.0.0 --port 9006 --debug
+
+FROM base as development
+
+COPY requirements_*.txt .
+RUN pip install -r requirements_development.txt
+
+FROM base as development-fullstack
+
+COPY requirements_*.txt .
+COPY --from=pipauth / /pip-auth
+RUN pip install -r requirements_development_fullstack.txt

@@ -4,6 +4,10 @@ import json
 import sys
 from signal import SIGINT, SIGTERM, signal
 
+import requests
+from authlib.jose import JsonWebKey, jwt
+from authlib.oauth2.rfc9068 import JWTBearerTokenValidator
+from authlib.oidc.discovery import get_well_known_url, OpenIDProviderMetadata
 from flask import Flask, Response, jsonify, redirect, request
 
 from .auth import AUTHENTICATION_HEADER, check_file_id, check_login
@@ -11,6 +15,38 @@ from .config_handling import init_config, is_dev_mode
 from .database import Database
 from .exceptions import BadRequestError, HttpError, NotFoundError
 from .logging import init_logging
+from authlib.integrations.flask_oauth2 import ResourceProtector, current_token
+
+cache = {}
+
+# Keycloak settings
+KEYCLOAK_DOMAIN = 'http://keycloak:8080'
+KEYCLOAK_REALM = 'os'
+ISSUER = f"{KEYCLOAK_DOMAIN}/realms/{KEYCLOAK_REALM}"
+
+class MyBearerTokenValidator(JWTBearerTokenValidator):
+    # Cache the JWKS keys to avoid fetching them repeatedly
+    jwk_set = None
+
+    def get_jwks_key_set(self):
+        if self.jwk_set is None:
+            oidc_configuration = OpenIDProviderMetadata(requests.get(get_well_known_url(ISSUER)).json())
+            response = requests.get(oidc_configuration.get('jwks_uri'))
+            response.raise_for_status()
+            jwks_keys = response.json()
+            self.jwk_set = JsonWebKey.import_key_set(jwks_keys)
+        return self.jwk_set
+
+    def verify_token(self, token):
+        try:
+            claims = jwt.decode(token, key=self.get_jwks_key_set())
+            claims.validate()
+            return claims
+        except Exception as e:
+            return None
+
+require_oauth = ResourceProtector()
+require_oauth.register_token_validator(MyBearerTokenValidator(ISSUER, 'https://localhost:8000/system'))
 
 app = Flask(__name__)
 with app.app_context():
@@ -34,6 +70,7 @@ def handle_view_error(error):
 
 
 @app.route("/system/media/get/<int:file_id>")
+@require_oauth()
 def serve(file_id):
     if not check_login():
         return redirect("/")
@@ -76,6 +113,7 @@ def serve(file_id):
 
 
 @app.route("/internal/media/upload_mediafile/", methods=["POST"])
+@require_oauth()
 def media_post():
     dejson = get_json_from_request()
     try:
@@ -96,6 +134,7 @@ def media_post():
 
 
 @app.route("/internal/media/duplicate_mediafile/", methods=["POST"])
+@require_oauth()
 def duplicate_mediafile():
     source_id, target_id = get_ids(get_json_from_request())
     app.logger.debug(f"source_id {source_id} and target_id {target_id}")
