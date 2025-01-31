@@ -7,6 +7,9 @@ RUN apt-get -y update && apt-get -y upgrade && \
 WORKDIR /app
 
 COPY requirements*.txt ./
+# The pip-auth library is copied from the openslides-auth-service in the Makefile before the build
+# ... in docker-compose.dev.yml the pip-auth is mounted to the container
+COPY pip-auth /pip-auth
 RUN pip install -r requirements_tests.txt
 
 COPY setup.cfg .

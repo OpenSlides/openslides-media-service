@@ -1,11 +1,12 @@
+from collections.abc import Mapping
 from os.path import join
 
 import jwt
 import psycopg2
 import pytest
 import requests
-from authlib import COOKIE_NAME
-from authlib.config import AUTH_DEV_COOKIE_SECRET
+from os_authlib import COOKIE_NAME
+from os_authlib.config import AUTH_DEV_COOKIE_SECRET
 
 GET_URL = "http://media:9006/system/media/get/"
 
@@ -34,6 +35,5 @@ def get_mediafile(id, use_cookie=True):
     if use_cookie:
         # dummy cookie for testing
         token = jwt.encode({"userId": 1}, AUTH_DEV_COOKIE_SECRET)
-        cookie = f"bearer {token}"
-        cookies[COOKIE_NAME] = cookie
-    return requests.get(join(GET_URL, str(id)), cookies=cookies, allow_redirects=False)
+        authentication = f"bearer {token}"
+    return requests.get(join(GET_URL, str(id)), headers={'Authentication': authentication}, allow_redirects=False)
