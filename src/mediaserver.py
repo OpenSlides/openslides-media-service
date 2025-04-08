@@ -50,7 +50,6 @@ def serve(file_id):
     app.logger.debug(f'Filename for "{file_id}" is {filename}')
 
     # Query file from db
-    global database
     data, mimetype = database.get_file(file_id)
 
     # Send data (chunked)
@@ -90,7 +89,6 @@ def media_post():
             f"The post request.data is not in right format: {request.data}"
         )
     app.logger.debug(f"to database {file_id} {mimetype}")
-    global database
     database.set_mediafile(file_id, file_data, mimetype)
     return "", 200
 
@@ -99,7 +97,6 @@ def media_post():
 def duplicate_mediafile():
     source_id, target_id = get_ids(get_json_from_request())
     app.logger.debug(f"source_id {source_id} and target_id {target_id}")
-    global database
     # Query file source_id from db
     data, mimetype = database.get_file(source_id)
     # Insert mediafile in target_id into db
