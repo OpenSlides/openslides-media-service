@@ -1,5 +1,15 @@
 build-dev:
 	docker build . -f Dockerfile.dev --tag openslides-media-dev
+ 
+build-aio:
+	@if [ "${context}" != "prod" -a "${context}" != "dev" -a "${context}" != "tests" ] ; then \
+		echo "Please provide a context for this build (context=<desired_context> , possible options: prod, dev, tests)"; \
+		exit 1; \
+	fi
+
+	echo "Building submodule 'media' for ${context} context"
+
+	@docker build -f ./Dockerfile.AIO ./ --tag openslides-media-${context} --build-arg CONTEXT=${context} --target ${context} ${args}
 
 build-tests:
 	docker build . -f Dockerfile.tests --tag openslides-media-tests
