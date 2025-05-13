@@ -17,8 +17,7 @@ ENV REQUIREMENTS_FILE=${tests:+"tests"}${prod:+"production"}${dev:+"development"
 
 RUN apt-get -y update && apt-get -y upgrade && \
     apt-get install --no-install-recommends -y \
-    postgresql-client libpq-dev git gcc ${CONTEXT_INSTALLS
-}
+    postgresql-client libpq-dev git gcc ${CONTEXT_INSTALLS}
 
 COPY requirements*.txt ./
 
