@@ -41,16 +41,6 @@ ENV REQUIREMENTS_FILE=
 ENTRYPOINT ["./entrypoint.sh"]
 
 
-# Production Image
-FROM base as prod
-
-## File Copies
-COPY src/* src/
-
-EXPOSE 9006
-CMD exec gunicorn -b 0.0.0.0:9006 src.mediaserver:app
-
-
 
 # Development Image
 FROM base as dev
@@ -77,3 +67,14 @@ RUN chmod 777 -R .
 
 STOPSIGNAL SIGKILL
 CMD ["sleep", "inf"]
+
+
+
+# Production Image
+FROM base as prod
+
+## File Copies
+COPY src/* src/
+
+EXPOSE 9006
+CMD exec gunicorn -b 0.0.0.0:9006 src.mediaserver:app
