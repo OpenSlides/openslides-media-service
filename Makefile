@@ -1,5 +1,21 @@
 build-dev:
-	docker build . -f Dockerfile.dev --tag openslides-media-dev
+	make build-aio context=dev submodule=media
+#docker build . -f Dockerfile.dev --tag openslides-media-dev
+ 
+build-aio:
+	@if [ -z "${submodule}" ] ; then \
+		echo "Please provide the name of the submodule service to build (submodule=<submodule service name>)"; \
+		exit 1; \
+	fi
+
+	@if [ "${context}" != "prod" -a "${context}" != "dev" -a "${context}" != "tests" ] ; then \
+		echo "Please provide a context for this build (context=<desired_context> , possible options: prod, dev, tests)"; \
+		exit 1; \
+	fi
+
+	echo "Building submodule '${submodule}' for ${context} context"
+
+	@docker build -f ./Dockerfile.AIO ./ --tag openslides-${submodule}-${context} --build-arg CONTEXT=${context} --target ${context} ${args}
 
 build-tests:
 	docker build . -f Dockerfile.tests --tag openslides-media-tests
@@ -11,8 +27,11 @@ start-test-setup: | build-dev build-tests build-dummy-autoupdate
 	docker compose -f docker-compose.test.yml up -d
 	docker compose -f docker-compose.test.yml exec -T tests wait-for-it "media:9006"
 
-run-tests: | start-test-setup
-	docker compose -f docker-compose.test.yml exec -T tests pytest
+run-tests:
+	bash dev/run-tests.sh
+
+#run-tests: | start-test-setup
+#	docker compose -f docker-compose.test.yml exec -T tests pytest
 
 run-dev run-bash: | start-test-setup
 	docker compose -f docker-compose.test.yml exec tests bash
