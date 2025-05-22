@@ -1,5 +1,5 @@
 ### Warum sind die Installs unterschiedlich zwischen Production und Dev?
-ARG CONTEXT=dev
+ARG CONTEXT=prod
 ARG PYTHON_IMAGE_VERSION=3.10.17
 
 FROM python:${PYTHON_IMAGE_VERSION}-slim-bookworm as base
