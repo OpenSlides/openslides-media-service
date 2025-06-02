@@ -1,24 +1,13 @@
+SERVICE=media
+
 build-dev:
-	make build-aio context=dev submodule=media
-#docker build . -f Dockerfile.dev --tag openslides-media-dev
- 
-build-aio:
-	@if [ -z "${submodule}" ] ; then \
-		echo "Please provide the name of the submodule service to build (submodule=<submodule service name>)"; \
-		exit 1; \
-	fi
+	bash ../dev/scripts/makefile/build-service.sh $(SERVICE) dev
 
-	@if [ "${context}" != "prod" -a "${context}" != "dev" -a "${context}" != "tests" ] ; then \
-		echo "Please provide a context for this build (context=<desired_context> , possible options: prod, dev, tests)"; \
-		exit 1; \
-	fi
+build-prod:
+	bash ../dev/scripts/makefile/build-service.sh $(SERVICE) prod
 
-	echo "Building submodule '${submodule}' for ${context} context"
-
-	@docker build -f ./Dockerfile.AIO ./ --tag openslides-${submodule}-${context} --build-arg CONTEXT=${context} --target ${context} ${args}
-
-build-tests:
-	docker build . -f Dockerfile.tests --tag openslides-media-tests
+build-test:
+	bash ../dev/scripts/makefile/build-service.sh $(SERVICE) tests
 
 build-dummy-autoupdate:
 	docker build . -f tests/dummy_autoupdate/Dockerfile.dummy_autoupdate --tag openslides-media-dummy-autoupdate

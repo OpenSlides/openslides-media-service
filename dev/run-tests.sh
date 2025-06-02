@@ -9,9 +9,10 @@ echo "########################################################################"
 CATCH=0
 PERSIST_CONTAINERS=$2
 CHOWN=$1
+
 # Builds
-docker build -f ./Dockerfile.AIO ./ --tag openslides-media-dev --target dev --build-arg CONTEXT=dev || CATCH=1
-docker build -f ./Dockerfile.AIO ./ --tag openslides-media-tests --target tests --build-arg CONTEXT=tests || CATCH=1
+make build-dev || CATCH=1
+make build-test || CATCH=1
 docker build . -f tests/dummy_autoupdate/Dockerfile.dummy_autoupdate --tag openslides-media-dummy-autoupdate || CATCH=1
 
 # Run Tests
