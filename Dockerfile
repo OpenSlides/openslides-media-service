@@ -13,7 +13,12 @@ ARG REQUIREMENTS_FILE=${tests:+"tests"}${prod:+"production"}${dev:+"development"
 
 ## Install
 
-RUN apt-get -y update && apt-get -y upgrade && apt-get install --no-install-recommends -y postgresql-client libpq-dev git gcc ${CONTEXT_INSTALLS} && \
+RUN apt-get -y update && apt-get -y upgrade && apt-get install --no-install-recommends -y \
+    gcc \
+    git \
+    libpq-dev \
+    postgresql-client \
+    ${CONTEXT_INSTALLS} && \
     rm -rf /var/lib/apt/lists/*
 
 COPY requirements*.txt ./
