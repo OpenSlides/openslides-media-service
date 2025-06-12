@@ -9,6 +9,12 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - name: Build Tests
+      uses: Janmtbehrens/OpenSlides/dev/actions/build-service@all-in-one
+      with:
+        service: media
+        context: tests
+
     - name: Run tests
       run: make run-tests
     
