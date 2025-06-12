@@ -3,7 +3,7 @@
 # Executes all tests. Should errors occur, CATCH will be set to 1, causing an erronous exit code.
 
 echo "########################################################################"
-echo "###################### Start full system tests #########################"
+echo "###################### Run Tests and Linters ###########################"
 echo "########################################################################"
 
 CATCH=0
@@ -11,8 +11,8 @@ PERSIST_CONTAINERS=$2
 CHOWN=$1
 
 # Builds
-make build-dev || CATCH=1
-make build-test || CATCH=1
+if [ "$(docker images -q openslides-media-dev)" = "" ]; then make build-dev || CATCH=1; fi
+if [ "$(docker images -q openslides-media-tests)" = "" ]; then make build-test || CATCH=1; fi
 docker build . -f tests/dummy_autoupdate/Dockerfile.dummy_autoupdate --tag openslides-media-dummy-autoupdate || CATCH=1
 
 # Run Tests
