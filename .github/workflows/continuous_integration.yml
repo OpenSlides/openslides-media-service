@@ -11,7 +11,7 @@ jobs:
 
     # Media Tests als need the dev image
     - name: Build Dev
-      uses: Janmtbehrens/OpenSlides/dev/actions/build-and-test-service@all-in-one
+      uses: Janmtbehrens/OpenSlides/dev/actions/build-service@all-in-one
       with:
         service: media
         context: dev
