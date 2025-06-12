@@ -9,17 +9,14 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Run tests
-      run: make run-tests
-    
-    - name: Run black
-      run: make check-black
-    
-    - name: Run isort
-      run: make check-isort
-    
-    - name: Run flake8
-      run: make flake8
+    # Media Tests als need the dev image
+    - name: Build Dev
+      uses: Janmtbehrens/OpenSlides/dev/actions/build-service@all-in-one
+      with:
+        service: media
+        context: dev
 
-    - name: Stop containers
-      run: make stop-tests
+    - name: Run Test
+      uses: Janmtbehrens/OpenSlides/dev/actions/build-and-test-service@all-in-one
+      with:
+        service: media
