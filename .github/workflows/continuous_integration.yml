@@ -9,14 +9,17 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Build Tests
-      uses: Janmtbehrens/OpenSlides/dev/actions/build-service@all-in-one
+    # Media Tests als need the dev image
+    - name: Build Dev
+      uses: Janmtbehrens/OpenSlides/dev/actions/build-and-test-service@all-in-one
       with:
         service: media
-        context: tests
+        context: dev
 
-    - name: Run tests
-      run: make run-tests
+    - name: Run Test
+      uses: Janmtbehrens/OpenSlides/dev/actions/build-and-test-service@all-in-one
+      with:
+        service: media
     
     - name: Run black
       run: make check-black
