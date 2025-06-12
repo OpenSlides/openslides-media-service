@@ -8,7 +8,6 @@ echo "########################################################################"
 
 CATCH=0
 PERSIST_CONTAINERS=$2
-CHOWN=$1
 
 # Builds
 if [ "$(docker images -q openslides-media-dev)" = "" ]; then make build-dev || CATCH=1; fi
