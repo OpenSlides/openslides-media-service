@@ -20,15 +20,3 @@ jobs:
       uses: Janmtbehrens/OpenSlides/dev/actions/build-and-test-service@all-in-one
       with:
         service: media
-    
-    - name: Run black
-      run: make check-black
-    
-    - name: Run isort
-      run: make check-isort
-    
-    - name: Run flake8
-      run: make flake8
-
-    - name: Stop containers
-      run: make stop-tests

@@ -19,6 +19,9 @@ docker build . -f tests/dummy_autoupdate/Dockerfile.dummy_autoupdate --tag opens
 docker compose -f docker-compose.test.yml up -d || CATCH=1
 docker compose -f docker-compose.test.yml exec -T tests wait-for-it "media:9006" || CATCH=1
 docker compose -f docker-compose.test.yml exec -T tests pytest || CATCH=1
+docker compose -f docker-compose.test.yml exec -T tests black --check --diff src/ tests/ || CATCH=1
+docker compose -f docker-compose.test.yml exec -T tests isort --check-only --diff src/ tests/ || CATCH=1
+docker compose -f docker-compose.test.yml exec -T tests flake8 src/ tests/ || CATCH=1
 
 if [ -z $PERSIST_CONTAINERS ]; then docker compose -f docker-compose.test.yml down || CATCH=1; fi
 
