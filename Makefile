@@ -19,9 +19,6 @@ start-test-setup: | build-dev build-tests build-dummy-autoupdate
 run-tests:
 	bash dev/run-tests.sh
 
-#run-tests: | start-test-setup
-#	docker compose -f docker-compose.test.yml exec -T tests pytest
-
 run-dev run-bash: | start-test-setup
 	docker compose -f docker-compose.test.yml exec tests bash
 
