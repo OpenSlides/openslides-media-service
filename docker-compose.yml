@@ -1,6 +1,10 @@
 version: "3.4"
 services:
     media:
+        build:
+            target: "dev"
+            args:
+                CONTEXT: "dev"
         image: openslides-media-dev
         environment:
             - MEDIA_DATABASE_HOST=postgres

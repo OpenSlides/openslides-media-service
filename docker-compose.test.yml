@@ -1,6 +1,10 @@
 version: "3.4"
 services:
     media:
+        build:
+            target: "dev"
+            args:
+                CONTEXT: "dev"
         image: openslides-media-dev
         environment:
             - MEDIA_DATABASE_HOST=postgres
@@ -17,10 +21,17 @@ services:
         ports:
             - 9006:9006
     dummy_autoupdate:
+        build:
+            dockerfile: tests/dummy_autoupdate/Dockerfile.dummy_autoupdate
+            context: tests/dummy_autoupdate/
         image: openslides-media-dummy-autoupdate
         volumes:
             - ./tests/dummy_autoupdate:/app/dummy_autoupdate
     tests:
+        build:
+            target: "tests"
+            args:
+                CONTEXT: "tests"
         image: openslides-media-tests
         environment:
             - OPENSLIDES_DEVELOPMENT=1
