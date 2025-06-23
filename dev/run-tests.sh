@@ -25,6 +25,6 @@ docker compose -f docker-compose.test.yml exec -T tests black --check --diff src
 docker compose -f docker-compose.test.yml exec -T tests isort --check-only --diff src/ tests/ || CATCH=1
 docker compose -f docker-compose.test.yml exec -T tests flake8 src/ tests/ || CATCH=1
 
-if [ -z $PERSIST_CONTAINERS ]; then docker compose -f docker-compose.test.yml down || CATCH=1; fi
+if [ -z "$PERSIST_CONTAINERS" ]; then docker compose -f docker-compose.test.yml down || CATCH=1; fi
 
 exit $CATCH
