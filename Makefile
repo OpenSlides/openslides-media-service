@@ -1,8 +1,13 @@
-build-dev:
-	docker build . -f Dockerfile.dev --tag openslides-media-dev
+SERVICE=media
 
-build-tests:
-	docker build . -f Dockerfile.tests --tag openslides-media-tests
+build-dev:
+	bash ../dev/scripts/makefile/build-service.sh $(SERVICE) dev
+
+build-prod:
+	bash ../dev/scripts/makefile/build-service.sh $(SERVICE) prod
+
+build-test:
+	bash ../dev/scripts/makefile/build-service.sh $(SERVICE) tests
 
 build-dummy-autoupdate:
 	docker build . -f tests/dummy_autoupdate/Dockerfile.dummy_autoupdate --tag openslides-media-dummy-autoupdate
@@ -11,8 +16,8 @@ start-test-setup: | build-dev build-tests build-dummy-autoupdate
 	docker compose -f docker-compose.test.yml up -d
 	docker compose -f docker-compose.test.yml exec -T tests wait-for-it "media:9006"
 
-run-tests: | start-test-setup
-	docker compose -f docker-compose.test.yml exec -T tests pytest
+run-tests:
+	bash dev/run-tests.sh
 
 run-dev run-bash: | start-test-setup
 	docker compose -f docker-compose.test.yml exec tests bash
