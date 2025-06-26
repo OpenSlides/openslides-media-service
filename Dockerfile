@@ -5,17 +5,14 @@ FROM python:3.10.18-slim-bookworm as base
 ## Setup
 ARG CONTEXT
 WORKDIR /app
-# Used for easy target differentiation
-ARG ${CONTEXT}=1 
 ENV APP_CONTEXT=${CONTEXT}
 
-### Context based queries
-ARG CONTEXT_INSTALLS=${tests:+"wait-for-it libc-dev"}${prod:+"python3-dev"}${dev:+"libc-dev"}
-ARG REQUIREMENTS_FILE=${tests:+"tests"}${prod:+"production"}${dev:+"development"}
-
 ## Install
-
-RUN apt-get -y update && apt-get -y upgrade && apt-get install --no-install-recommends -y \
+RUN CONTEXT_INSTALLS=$(case "$APP_CONTEXT" in \
+    tests)  echo "wait-for-it libc-dev";; \
+    dev)    echo "libc-dev";; \
+    *)      echo "python3-dev" ;; esac) && \
+    apt-get -y update && apt-get -y upgrade && apt-get install --no-install-recommends -y \
     gcc \
     git \
     libpq-dev \
@@ -25,7 +22,11 @@ RUN apt-get -y update && apt-get -y upgrade && apt-get install --no-install-reco
 
 COPY requirements*.txt ./
 
-RUN pip install --no-cache-dir -r requirements_${REQUIREMENTS_FILE}.txt
+RUN REQUIREMENTS_FILE=$(case "$APP_CONTEXT" in \
+    tests) echo "tests";; \
+    dev)   echo "development";; \
+    *)     echo "production" ;; esac) && \
+    pip install --no-cache-dir -r "requirements_${REQUIREMENTS_FILE}.txt"
 
 ## File copies
 COPY scripts/entrypoint.sh .
@@ -43,8 +44,6 @@ COPY ./dev/command.sh ./
 RUN chmod +x command.sh
 CMD ["./command.sh"]
 
-
-
 # Development Image
 FROM base as dev
 
@@ -54,8 +53,6 @@ COPY scripts/execute-cleanup.sh .
 
 EXPOSE 9006
 
-
-
 # Test Image
 FROM base as tests
 
@@ -63,12 +60,9 @@ FROM base as tests
 COPY src/* src/
 COPY setup.cfg .
 
-
 ## Command
 STOPSIGNAL SIGKILL
 CMD ["sleep", "inf"]
-
-
 
 # Production Image
 FROM base as prod
