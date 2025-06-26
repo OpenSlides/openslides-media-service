@@ -5,7 +5,9 @@ FROM python:3.10.18-slim-bookworm as base
 ## Setup
 ARG CONTEXT
 WORKDIR /app
-ENV ${CONTEXT}=1
+# Used for easy target differentiation
+ARG ${CONTEXT}=1 
+ENV APP_CONTEXT=${CONTEXT}
 
 ### Context based queries
 ARG CONTEXT_INSTALLS=${tests:+"wait-for-it libc-dev"}${prod:+"python3-dev"}${dev:+"libc-dev"}
@@ -50,8 +52,6 @@ FROM base as dev
 COPY setup.cfg .
 COPY scripts/execute-cleanup.sh .
 
-RUN chmod 777 -R .
-
 EXPOSE 9006
 
 
@@ -63,7 +63,6 @@ FROM base as tests
 COPY src/* src/
 COPY setup.cfg .
 
-RUN chmod 777 -R .
 
 ## Command
 STOPSIGNAL SIGKILL
