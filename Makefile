@@ -1,38 +1,64 @@
-SERVICE=media
+override SERVICE=media
+override MAKEFILE_PATH=../dev/scripts/makefile
+override DOCKER_COMPOSE_FILE=docker-compose.test.yml
 
-build-dev:
-	bash ../dev/scripts/makefile/build-service.sh $(SERVICE) dev
+# Build images for different contexts
 
-build-prod:
-	bash ../dev/scripts/makefile/build-service.sh $(SERVICE) prod
+build build-prod build-dev build-tests:
+	bash $(MAKEFILE_PATH)/make-build-service.sh $@ $(SERVICE)
 
-build-test:
-	bash ../dev/scripts/makefile/build-service.sh $(SERVICE) tests
+# Development
 
-build-dummy-autoupdate:
-	docker build . -f tests/dummy_autoupdate/Dockerfile.dummy_autoupdate --tag openslides-media-dummy-autoupdate
+run-dev run-dev-standalone run-dev-detached run-dev-help run-dev-stop run-dev-clean run-dev-exec run-dev-enter:
+	bash $(MAKEFILE_PATH)/make-run-dev.sh "$@" "$(SERVICE)" "$(DOCKER_COMPOSE_FILE)" "$(ARGS)"
 
-start-test-setup: | build-dev build-tests build-dummy-autoupdate
-	docker compose -f docker-compose.test.yml up -d
-	docker compose -f docker-compose.test.yml exec -T tests wait-for-it "media:9006"
+run-dev-attached:
+	make run-dev-detached
+	make run-dev-exec ARGS='-T tests wait-for-it "media:9006"'
+	make run-dev-enter ARGS='tests'
+	make run-dev-stop
+
+# Tests
 
 run-tests:
 	bash dev/run-tests.sh
 
-run-dev run-bash: | start-test-setup
-	docker compose -f docker-compose.test.yml exec tests bash
+run-lint:
+	bash dev/run-lint.sh -l
 
-check-black:
-	docker compose -f docker-compose.test.yml exec -T tests black --check --diff src/ tests/
-
-check-isort:
-	docker compose -f docker-compose.test.yml exec -T tests isort --check-only --diff src/ tests/
-
-flake8:
-	docker compose -f docker-compose.test.yml exec -T tests flake8 src/ tests/
-
-stop-tests:
-	docker compose -f docker-compose.test.yml down
+# Cleanup
 
 run-cleanup: | build-dev
 	docker run -ti --entrypoint="" -v `pwd`/src:/app/src -v `pwd`/tests:/app/tests openslides-media-dev bash -c "./execute-cleanup.sh"
+
+
+
+
+########################## Deprecation List ##########################
+
+deprecation-warning:
+	bash $(MAKEFILE_PATH)/make-deprecation-warning.sh
+
+
+build-dummy-autoupdate: | deprecation-warning
+	docker build . -f tests/dummy_autoupdate/Dockerfile.dummy_autoupdate --tag openslides-media-dummy-autoupdate
+
+check-black:
+	bash $(MAKEFILE_PATH)/make-deprecation-warning.sh "run-lint"
+	docker compose -f docker-compose.test.yml exec -T tests black --check --diff src/ tests/
+
+check-isort:
+	bash $(MAKEFILE_PATH)/make-deprecation-warning.sh "run-lint"
+	docker compose -f docker-compose.test.yml exec -T tests isort --check-only --diff src/ tests/
+
+flake8:
+	bash $(MAKEFILE_PATH)/make-deprecation-warning.sh "run-lint"
+	docker compose -f docker-compose.test.yml exec -T tests flake8 src/ tests/
+
+start-test-setup: | deprecation-warning build-dev build-tests build-dummy-autoupdate
+	docker compose -f docker-compose.test.yml up -d
+	docker compose -f docker-compose.test.yml exec -T tests wait-for-it "media:9006"
+
+run-bash:
+	bash $(MAKEFILE_PATH)/make-deprecation-warning.sh "run-dev"
+	make run-dev
