@@ -7,10 +7,11 @@ echo "###################### Run Linters #####################################"
 echo "########################################################################"
 
 # Parameters
-while getopts "lbp" FLAG; do
+while getopts "lscp" FLAG; do
     case "${FLAG}" in
     l) LOCAL=true ;;
-    b) BUILD=true ;;
+    s) SKIP_BUILD=true ;;
+    c) SKIP_CONTAINER_UP=true ;;
     p) PERSIST_CONTAINERS=true ;;
     *) echo "Can't parse flag ${FLAG}" && break ;;
     esac
@@ -22,12 +23,15 @@ CATCH=0
 DC="docker compose -f docker-compose.test.yml"
 
 # Optionally build image
-if [ -n "$BUILD" ]
+if [ -z "$SKIP_BUILD" ]
 then
-    if [ "$(docker images -q openslides-media-dev)" = "" ]; then make build-dev || CATCH=1; fi
-    if [ "$(docker images -q openslides-media-tests)" = "" ]; then make build-test || CATCH=1; fi
+    make build-dev || CATCH=1
+    make build-tests || CATCH=1
     docker build . -f tests/dummy_autoupdate/Dockerfile.dummy_autoupdate --tag openslides-media-dummy-autoupdate || CATCH=1
+fi
 
+if [ -z "$SKIP_CONTAINER_UP" ]
+then
 	eval "$DC up -d" || CATCH=1
 	eval '$DC -T tests wait-for-it "media:9006"' || CATCH=1
 fi
@@ -36,8 +40,6 @@ fi
 if [ -z "$LOCAL" ]
 then
     # Container Mode
-    docker run -d -t --name autoupdate-test ${IMAGE_TAG} || CATCH=1
-
     eval "$DC exec -T tests black --check --diff src/ tests/" || CATCH=1
     eval "$DC exec -T tests isort --check-only --diff src/ tests/" || CATCH=1
     eval "$DC exec -T tests tests flake8 src/ tests/" || CATCH=1
@@ -49,6 +51,6 @@ else
     flake8 src/ tests/
 fi
 
-if [ -z "$PERSIST_CONTAINERS" ] && [ -n "$BUILD" ]; then docker stop autoupdate-test && docker rm autoupdate-test || CATCH=1; fi
+if [ -z "$PERSIST_CONTAINERS" ] && [ -z "$SKIP_CONTAINER_UP" ]; then docker stop autoupdate-test && docker rm autoupdate-test || CATCH=1; fi
 
 exit $CATCH
