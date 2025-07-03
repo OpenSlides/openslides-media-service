@@ -9,7 +9,9 @@ build build-prod build-dev build-tests:
 
 # Development
 
-run-dev run-dev-standalone run-dev-detached run-dev-help run-dev-stop run-dev-clean run-dev-exec run-dev-enter:
+.PHONY: run-dev%
+
+run-dev%:
 	bash $(MAKEFILE_PATH)/make-run-dev.sh "$@" "$(SERVICE)" "$(DOCKER_COMPOSE_FILE)" "$(ARGS)" "bash"
 
 run-dev-attached:
