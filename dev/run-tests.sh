@@ -13,8 +13,8 @@ CATCH=0
 trap 'docker compose -f docker-compose.test.yml down' EXIT
 
 # Builds
-if [ "$(docker images -q openslides-media-dev)" = "" ]; then make build-dev || CATCH=1; fi
-if [ "$(docker images -q openslides-media-tests)" = "" ]; then make build-test || CATCH=1; fi
+make build-dev || CATCH=1
+make build-test || CATCH=1
 docker build . -f tests/dummy_autoupdate/Dockerfile.dummy_autoupdate --tag openslides-media-dummy-autoupdate || CATCH=1
 
 # Execution

@@ -1,13 +1,13 @@
 SERVICE=media
 
-build-dev:
-	bash ../dev/scripts/makefile/build-service.sh $(SERVICE) dev
-
 build-prod:
-	bash ../dev/scripts/makefile/build-service.sh $(SERVICE) prod
+	docker build ./ --tag "openslides-$(SERVICE)" --build-arg CONTEXT="prod" --target "prod"
+
+build-dev:
+	docker build ./ --tag "openslides-$(SERVICE)-dev" --build-arg CONTEXT="dev" --target "dev"
 
 build-test:
-	bash ../dev/scripts/makefile/build-service.sh $(SERVICE) tests
+	docker build ./ --tag "openslides-$(SERVICE)-tests" --build-arg CONTEXT="tests" --target "tests"
 
 build-dummy-autoupdate:
 	docker build . -f tests/dummy_autoupdate/Dockerfile.dummy_autoupdate --tag openslides-media-dummy-autoupdate
