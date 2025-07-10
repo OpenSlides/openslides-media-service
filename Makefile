@@ -12,10 +12,6 @@ build-test:
 build-dummy-autoupdate:
 	docker build . -f tests/dummy_autoupdate/Dockerfile.dummy_autoupdate --tag openslides-media-dummy-autoupdate
 
-start-test-setup: | build-dev build-tests build-dummy-autoupdate
-	docker compose -f docker-compose.test.yml up -d
-	docker compose -f docker-compose.test.yml exec -T tests wait-for-it "media:9006"
-
 run-tests:
 	bash dev/run-tests.sh
 
@@ -36,3 +32,10 @@ stop-tests:
 
 run-cleanup: | build-dev
 	docker run -ti --entrypoint="" -v `pwd`/src:/app/src -v `pwd`/tests:/app/tests openslides-media-dev bash -c "./execute-cleanup.sh"
+
+start-test-setup: | build-dev build-test build-dummy-autoupdate
+	docker compose -f docker-compose.test.yml up -d
+	docker compose -f docker-compose.test.yml exec -T tests wait-for-it "media:9006"
+
+run-tests-ci: | start-test-setup
+	docker compose -f docker-compose.test.yml exec -T tests pytest

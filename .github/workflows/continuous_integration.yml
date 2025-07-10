@@ -3,21 +3,23 @@ name: CI - Build and Test Service
 on: [ push, pull_request ]
 
 jobs:
-  # This setups and runs the dev/run-tests.sh script
-  run-test-script:
-    name: Run-tests.sh Script
+  tests:
+    name: "Tests"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+    - uses: actions/checkout@v4
 
-      # Media Tests als need the dev image
-      - name: Build Dev
-        uses: OpenSlides/OpenSlides/dev/actions/build-service@main
-        with:
-          service: media
-          context: dev
+    - name: Run tests
+      run: make run-tests-ci
 
-      - name: Run Test
-        uses: OpenSlides/OpenSlides/dev/actions/build-and-test-service@main
-        with:
-          service: media
+    - name: Run black
+      run: make check-black
+
+    - name: Run isort
+      run: make check-isort
+
+    - name: Run flake8
+      run: make flake8
+
+    - name: Stop containers
+      run: make stop-tests
