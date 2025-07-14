@@ -19,30 +19,32 @@ done
 
 # Setup
 IMAGE_TAG=openslides-media-tests
-CATCH=0
 DC="docker compose -f docker-compose.test.yml"
+
+# Safe Exit
+trap 'if [ -z "$PERSIST_CONTAINERS" ] && [ -z "$SKIP_CONTAINER_UP" ]; then docker stop autoupdate-test && docker rm autoupdate-test; fi' EXIT
 
 # Optionally build image
 if [ -z "$SKIP_BUILD" ]
 then
-    make build-dev || CATCH=1
-    make build-tests || CATCH=1
-    docker build . -f tests/dummy_autoupdate/Dockerfile.dummy_autoupdate --tag openslides-media-dummy-autoupdate || CATCH=1
+    make build-dev
+    make build-tests
+    docker build . -f tests/dummy_autoupdate/Dockerfile.dummy_autoupdate --tag openslides-media-dummy-autoupdate
 fi
 
 if [ -z "$SKIP_CONTAINER_UP" ]
 then
-	eval "$DC up -d" || CATCH=1
-	eval '$DC -T tests wait-for-it "media:9006"' || CATCH=1
+	eval "$DC up -d"
+	eval '$DC -T tests wait-for-it "media:9006"'
 fi
 
 # Execution
 if [ -z "$LOCAL" ]
 then
     # Container Mode
-    eval "$DC exec -T tests black --check --diff src/ tests/" || CATCH=1
-    eval "$DC exec -T tests isort --check-only --diff src/ tests/" || CATCH=1
-    eval "$DC exec -T tests tests flake8 src/ tests/" || CATCH=1
+    eval "$DC exec -T tests black --check --diff src/ tests/"
+    eval "$DC exec -T tests isort --check-only --diff src/ tests/"
+    eval "$DC exec -T tests tests flake8 src/ tests/"
 
 else
     # Local Mode
@@ -50,7 +52,3 @@ else
     isort --diff src/ tests/
     flake8 src/ tests/
 fi
-
-if [ -z "$PERSIST_CONTAINERS" ] && [ -z "$SKIP_CONTAINER_UP" ]; then docker stop autoupdate-test && docker rm autoupdate-test || CATCH=1; fi
-
-exit $CATCH
