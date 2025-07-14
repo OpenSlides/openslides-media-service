@@ -15,23 +15,23 @@ build-tests:
 
 # Development
 
-.PHONY: run-dev%
+.PHONY: dev%
 
-run-dev%:
-	bash $(MAKEFILE_PATH)/make-run-dev.sh "$@" "$(SERVICE)" "$(DOCKER_COMPOSE_FILE)" "$(ARGS)" "bash"
+dev%:
+	bash $(MAKEFILE_PATH)/make-dev.sh "$@" "$(SERVICE)" "$(DOCKER_COMPOSE_FILE)" "$(ARGS)" "bash"
 
-run-dev-attached:
-	make run-dev-detached
-	make run-dev-exec ARGS='-T tests wait-for-it "media:9006"'
-	make run-dev-enter ARGS='tests'
-	make run-dev-stop
+dev-attached:
+	make dev-detached
+	make dev-exec ARGS='-T tests wait-for-it "media:9006"'
+	make dev-enter ARGS='tests'
+	make dev-stop
 
 # Tests
 
 run-tests:
 	bash dev/run-tests.sh
 
-run-lint:
+lint:
 	bash dev/run-lint.sh -l
 
 run-tests-ci: | start-test-setup
@@ -69,5 +69,5 @@ start-test-setup: | deprecation-warning build-dev build-tests build-dummy-autoup
 	docker compose -f docker-compose.test.yml exec -T tests wait-for-it "media:9006"
 
 run-bash:
-	bash $(MAKEFILE_PATH)/make-deprecation-warning.sh "run-dev"
-	make run-dev
+	bash $(MAKEFILE_PATH)/make-deprecation-warning.sh "dev"
+	make dev
