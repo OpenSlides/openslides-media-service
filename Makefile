@@ -10,7 +10,7 @@ build-prod:
 build-dev:
 	docker build ./ --tag "openslides-$(SERVICE)-dev" --build-arg CONTEXT="dev" --target "dev"
 
-build-test:
+build-tests:
 	docker build ./ --tag "openslides-$(SERVICE)-tests" --build-arg CONTEXT="tests" --target "tests"
 
 # Development
@@ -34,18 +34,14 @@ run-tests:
 run-lint:
 	bash dev/run-lint.sh -l
 
+run-tests-ci: | start-test-setup
+	docker compose -f docker-compose.test.yml exec -T tests pytest
+
 # Cleanup
 
 run-cleanup: | build-dev
 	docker run -ti --entrypoint="" -v `pwd`/src:/app/src -v `pwd`/tests:/app/tests openslides-media-dev bash -c "./execute-cleanup.sh"
 
-## TODO
-start-test-setup: | build-dev build-test build-dummy-autoupdate
-	docker compose -f docker-compose.test.yml up -d
-	docker compose -f docker-compose.test.yml exec -T tests wait-for-it "media:9006"
-
-run-tests-ci: | start-test-setup
-	docker compose -f docker-compose.test.yml exec -T tests pytest
 
 ########################## Deprecation List ##########################
 

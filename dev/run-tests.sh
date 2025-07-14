@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 # Executes all tests. Should errors occur, CATCH will be set to 1, causing an erroneous exit code.
 
 echo "########################################################################"
@@ -34,4 +36,4 @@ docker compose -f docker-compose.test.yml exec -T tests wait-for-it "media:9006"
 docker compose -f docker-compose.test.yml exec -T tests pytest
 
 # Linters
-bash "$LOCAL_PWD"/run-lint.sh -s -c
+bash "$LOCAL_PWD"/run-lint.sh
