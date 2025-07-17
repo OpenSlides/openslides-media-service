@@ -46,22 +46,24 @@ run-cleanup: | build-dev
 ########################## Deprecation List ##########################
 
 deprecation-warning:
-	bash $(MAKEFILE_PATH)/make-deprecation-warning.sh
+	@echo "\033[1;33m DEPRECATION WARNING: This make command is deprecated and will be removed soon! \033[0m"
 
+deprecation-warning-alternative: | deprecation-warning
+	@echo "\033[1;33m Please use the following command instead: $(ALTERNATIVE) \033[0m"
 
 build-dummy-autoupdate: | deprecation-warning
 	docker build . -f tests/dummy_autoupdate/Dockerfile.dummy_autoupdate --tag openslides-media-dummy-autoupdate
 
 check-black:
-	bash $(MAKEFILE_PATH)/make-deprecation-warning.sh "run-lint"
+	@make deprecation-warning-alternative ALTERNATIVE="run-lint"
 	docker compose -f docker-compose.test.yml exec -T tests black --check --diff src/ tests/
 
 check-isort:
-	bash $(MAKEFILE_PATH)/make-deprecation-warning.sh "run-lint"
+	@make deprecation-warning-alternative ALTERNATIVE="run-lint"
 	docker compose -f docker-compose.test.yml exec -T tests isort --check-only --diff src/ tests/
 
 flake8:
-	bash $(MAKEFILE_PATH)/make-deprecation-warning.sh "run-lint"
+	@make deprecation-warning-alternative ALTERNATIVE="run-lint"
 	docker compose -f docker-compose.test.yml exec -T tests flake8 src/ tests/
 
 start-test-setup: | deprecation-warning build-dev build-tests build-dummy-autoupdate
@@ -69,5 +71,5 @@ start-test-setup: | deprecation-warning build-dev build-tests build-dummy-autoup
 	docker compose -f docker-compose.test.yml exec -T tests wait-for-it "media:9006"
 
 run-bash:
-	bash $(MAKEFILE_PATH)/make-deprecation-warning.sh "dev"
+	@make deprecation-warning-alternative ALTERNATIVE="dev"
 	make dev
