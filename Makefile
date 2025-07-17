@@ -1,6 +1,4 @@
 override SERVICE=media
-override MAKEFILE_PATH=../dev/scripts/makefile
-override DOCKER_COMPOSE_FILE=docker-compose.test.yml
 
 # Build images for different contexts
 
@@ -12,19 +10,6 @@ build-dev:
 
 build-tests:
 	docker build ./ --tag "openslides-$(SERVICE)-tests" --build-arg CONTEXT="tests" --target "tests"
-
-# Development
-
-.PHONY: dev
-
-dev dev-help dev-standalone dev-detached dev-stop dev-exec dev-enter:
-	bash $(MAKEFILE_PATH)/make-dev.sh "$@" "$(SERVICE)" "$(DOCKER_COMPOSE_FILE)" "$(ARGS)" "bash"
-
-dev-attached:
-	make dev-detached
-	make dev-exec ARGS='-T tests wait-for-it "media:9006"'
-	make dev-enter ARGS='tests'
-	make dev-stop
 
 # Tests
 
