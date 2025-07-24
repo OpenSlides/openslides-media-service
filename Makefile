@@ -51,6 +51,12 @@ flake8:
 	@make deprecation-warning-alternative ALTERNATIVE="run-lint"
 	docker compose -f docker-compose.test.yml exec -T tests flake8 src/ tests/
 
+stop-tests:
+	docker compose -f docker-compose.test.yml down
+
+run-cleanup: | build-dev
+	docker run -ti --entrypoint="" -v `pwd`/src:/app/src -v `pwd`/tests:/app/tests openslides-media-dev bash -c "./execute-cleanup.sh"
+
 start-test-setup: | deprecation-warning build-dev build-tests build-dummy-autoupdate
 	docker compose -f docker-compose.test.yml up -d
 	docker compose -f docker-compose.test.yml exec -T tests wait-for-it "media:9006"
