@@ -36,7 +36,7 @@ deprecation-warning:
 deprecation-warning-alternative: | deprecation-warning
 	@echo "\033[1;33m Please use the following command instead: $(ALTERNATIVE) \033[0m"
 
-run-dev run-dev-attach run-dev-attached run-dev-standalone run-bash run-dev-interactive stop-dev:
+run-dev run-dev-attach run-dev-attached run-dev-standalone run-dev-interactive stop-dev:
 	@make deprecation-warning-alternative ALTERNATIVE="dev and derivative maketargets are now only available in main repository. (use 'make dev-help' in main repository for more information)"
 
 build-dummy-autoupdate: | deprecation-warning
@@ -56,9 +56,6 @@ flake8:
 
 stop-tests:
 	docker compose -f docker-compose.test.yml down
-
-run-cleanup: | build-dev
-	docker run -ti --entrypoint="" -v `pwd`/src:/app/src -v `pwd`/tests:/app/tests openslides-media-dev bash -c "./execute-cleanup.sh"
 
 start-test-setup: | deprecation-warning build-dev build-tests build-dummy-autoupdate
 	docker compose -f docker-compose.test.yml up -d

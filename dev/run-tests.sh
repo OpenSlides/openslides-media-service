@@ -25,9 +25,9 @@ trap 'docker compose -f docker-compose.test.yml down' EXIT
 # Builds
 if [ -z "$SKIP_BUILD" ]
 then
-    make build-dev
-    make build-tests
-    docker build . -f tests/dummy_autoupdate/Dockerfile.dummy_autoupdate --tag openslides-media-dummy-autoupdate
+    make build-dev &> /dev/null
+    make build-tests &> /dev/null
+    docker build . -f tests/dummy_autoupdate/Dockerfile.dummy_autoupdate --tag openslides-media-dummy-autoupdate &> /dev/null
 fi
 
 # Execution
