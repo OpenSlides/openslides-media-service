@@ -17,7 +17,7 @@ while getopts "s" FLAG; do
 done
 
 # Setup
-LOCAL_PWD=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+LOCAL_PWD=$(dirname "$0")
 
 # Safe Exit
 trap 'docker compose -f docker-compose.test.yml down' EXIT
