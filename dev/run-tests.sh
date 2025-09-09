@@ -1,28 +1,39 @@
 #!/bin/bash
 
+set -e
+
 # Executes all tests. Should errors occur, CATCH will be set to 1, causing an erroneous exit code.
 
 echo "########################################################################"
 echo "###################### Run Tests and Linters ###########################"
 echo "########################################################################"
 
+# Parameters
+while getopts "s" FLAG; do
+    case "${FLAG}" in
+    s) SKIP_BUILD=true ;;
+    *) echo "Can't parse flag ${FLAG}" && break ;;
+    esac
+done
+
 # Setup
-CATCH=0
+LOCAL_PWD=$(dirname "$0")
 
 # Safe Exit
 trap 'docker compose -f docker-compose.test.yml down' EXIT
 
 # Builds
-make build-dev || CATCH=1
-make build-test || CATCH=1
-docker build . -f tests/dummy_autoupdate/Dockerfile.dummy_autoupdate --tag openslides-media-dummy-autoupdate || CATCH=1
+if [ -z "$SKIP_BUILD" ]
+then
+    make build-dev &> /dev/null
+    make build-tests &> /dev/null
+    docker build . -f tests/dummy_autoupdate/Dockerfile.dummy_autoupdate --tag openslides-media-dummy-autoupdate &> /dev/null
+fi
 
 # Execution
-docker compose -f docker-compose.test.yml up -d || CATCH=1
-docker compose -f docker-compose.test.yml exec -T tests wait-for-it "media:9006" || CATCH=1
-docker compose -f docker-compose.test.yml exec -T tests pytest || CATCH=1
-docker compose -f docker-compose.test.yml exec -T tests black --check --diff src/ tests/ || CATCH=1
-docker compose -f docker-compose.test.yml exec -T tests isort --check-only --diff src/ tests/ || CATCH=1
-docker compose -f docker-compose.test.yml exec -T tests flake8 src/ tests/ || CATCH=1
+docker compose -f docker-compose.test.yml up -d
+docker compose -f docker-compose.test.yml exec -T tests wait-for-it "media:9006"
+docker compose -f docker-compose.test.yml exec -T tests pytest
 
-exit $CATCH
+# Linters
+bash "$LOCAL_PWD"/run-lint.sh

@@ -1,6 +1,6 @@
 ARG CONTEXT=prod
 
-FROM python:3.10.18-slim-bookworm as base
+FROM python:3.10.18-slim-bookworm AS base
 
 ## Setup
 ARG CONTEXT
@@ -45,7 +45,7 @@ RUN chmod +x command.sh
 CMD ["./command.sh"]
 
 # Development Image
-FROM base as dev
+FROM base AS dev
 
 ## File Copies
 COPY setup.cfg .
@@ -54,7 +54,7 @@ COPY scripts/execute-cleanup.sh .
 EXPOSE 9006
 
 # Test Image
-FROM base as tests
+FROM base AS tests
 
 ## File Copies
 COPY src/* src/
@@ -65,7 +65,7 @@ STOPSIGNAL SIGKILL
 CMD ["sleep", "inf"]
 
 # Production Image
-FROM base as prod
+FROM base AS prod
 
 # Add appuser
 RUN adduser --system --no-create-home appuser && \
