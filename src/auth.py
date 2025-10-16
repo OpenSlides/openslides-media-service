@@ -1,7 +1,7 @@
 from urllib import parse
 
 import requests
-from authlib import (
+from osauthlib import (
     AUTHENTICATION_HEADER,
     COOKIE_NAME,
     AuthenticateException,
