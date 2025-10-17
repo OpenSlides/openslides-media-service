@@ -1,6 +1,8 @@
 from urllib import parse
 
 import requests
+from flask import current_app as app
+from flask import request
 from osauthlib import (
     AUTHENTICATION_HEADER,
     COOKIE_NAME,
@@ -8,8 +10,6 @@ from osauthlib import (
     AuthHandler,
     InvalidCredentialsException,
 )
-from flask import current_app as app
-from flask import request
 
 from .exceptions import ServerError
 
