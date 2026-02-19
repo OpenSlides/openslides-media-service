@@ -1,42 +1,43 @@
-from urllib import parse
-
 import requests
 from flask import current_app as app
 from flask import request
-from osauthlib import (
+
+from os_authlib import (
     AUTHENTICATION_HEADER,
-    COOKIE_NAME,
     AuthenticateException,
     AuthHandler,
-    InvalidCredentialsException,
-)
-
-from .exceptions import ServerError
+    InvalidCredentialsException, AUTHORIZATION_HEADER, )
+from ..exceptions import ServerError
 
 
-def check_login_valid():
-    """Returns whether the user is logged in or not."""
+def get_user_id():
+    """Returns the user id from the auth cookie."""
     auth_handler = AuthHandler(app.logger.debug)
-    cookie = request.cookies.get(COOKIE_NAME, "")
+    authentication = request.headers.get(AUTHORIZATION_HEADER, "")
+    app.logger.info(f"Get user id from auth header: {authentication}")
     try:
-        auth_handler.authenticate_only_refresh_id(parse.unquote(cookie))
+        (user_id, _) = auth_handler.authenticate(authentication)
     except (AuthenticateException, InvalidCredentialsException):
+        return -1
+    return user_id
+
+
+def check_login():
+    """Returns whether the user is logged in or not."""
+    user_id = get_user_id()
+    if user_id == -1:
         return False
     return True
 
 
-def check_file_id(file_id, autoupdate_headers):
+def check_file_id(file_id, autoupdate_headers, user_id):
     """
     Returns a triple: ok, filename, auth_header.
     filename is given, if ok=True. If ok=false, the user has no perms.
     if auth_header is returned, it must be set in the response.
     """
-    auth_handler = AuthHandler(app.logger.debug)
-    cookie = request.cookies.get(COOKIE_NAME, "")
-    try:
-        user_id = auth_handler.authenticate_only_refresh_id(parse.unquote(cookie))
-    except (AuthenticateException, InvalidCredentialsException):
-        raise ServerError("Could not parse auth cookie")
+    if user_id == -1:
+        raise ServerError("Could not find authentication")
 
     autoupdate_url = get_autoupdate_url(user_id)
     payload = [
@@ -71,11 +72,11 @@ def check_file_id(file_id, autoupdate_headers):
     if not isinstance(content, dict):
         raise ServerError("The returned content is not a dict.")
 
-    auth_header = response.headers.get(AUTHENTICATION_HEADER)
+    auth_header = response.headers.get(AUTHORIZATION_HEADER)
 
     if (
-        f"mediafile/{file_id}/id" not in content
-        or content[f"mediafile/{file_id}/id"] != file_id
+            f"mediafile/{file_id}/id" not in content
+            or content[f"mediafile/{file_id}/id"] != file_id
     ):
         return False, None, auth_header
 

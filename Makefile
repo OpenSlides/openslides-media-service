@@ -8,6 +8,9 @@ build-prod:
 build-dev:
 	docker build ./ $(ARGS) --tag "openslides-$(SERVICE)-dev" --build-arg CONTEXT="dev" --target "dev"
 
+build-dev-fullstack:
+	DOCKER_BUILDKIT=1 docker build . -f Dockerfile.dev --target development-fullstack --build-context pipauth=../openslides-auth-service/libraries/pip-auth --tag openslides-media-dev-fullstack
+
 build-tests:
 	docker build ./ $(ARGS) --tag "openslides-$(SERVICE)-tests" --build-arg CONTEXT="tests" --target "tests"
 

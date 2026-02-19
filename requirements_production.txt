@@ -1,7 +1,7 @@
 Flask==3.1.2
 gunicorn==23.0.0
 psycopg2==2.9.11
-requests==2.32.5
+requests==2.32.3
 
 # authlib
-git+https://github.com/OpenSlides/openslides-auth-service.git@b1bb367491515460df46ec9fac7528b6f383a368#egg=osauthlib&subdirectory=auth/libraries/pip-auth
+git+https://github.com/kryptance/openslides-auth-service.git@d074d2b#egg=os-authlib&subdirectory=libraries/pip-auth
