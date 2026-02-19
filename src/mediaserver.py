@@ -1,12 +1,17 @@
 import atexit
 import base64
 import json
+import os
 import sys
 from signal import SIGINT, SIGTERM, signal
 
+from authlib.integrations.flask_oauth2 import ResourceProtector, current_token
+from authlib.oauth2 import OAuth2Error
 from flask import Flask, Response, jsonify, redirect, request
+from flask import json
 
-from .auth import AUTHENTICATION_HEADER, check_file_id, check_login_valid
+from os_authlib.token_validator import create_openslides_token_validator
+from .auth.auth import AUTHENTICATION_HEADER, check_file_id
 from .config_handling import init_config, is_dev_mode
 from .database import Database
 from .exceptions import BadRequestError, HttpError, NotFoundError
@@ -18,32 +23,46 @@ with app.app_context():
     init_config()
     database = Database()
 
-app.logger.info("Started media server")
+require_oauth = ResourceProtector()
+require_oauth.register_token_validator(create_openslides_token_validator())
 
-
-@app.errorhandler(HttpError)
+@app.errorhandler(Exception)
 def handle_view_error(error):
-    app.logger.error(
-        f"Request to {request.path} resulted in {error.status_code}: "
-        f"{error.message}"
-    )
-    res_content = {"message": f"Media-Server: {error.message}"}
-    response = jsonify(res_content)
-    response.status_code = error.status_code
-    return response
+    if isinstance(error, HttpError):
+        app.logger.error(
+            f"Request to {request.path} resulted in {error.status_code}: "
+            f"{error.message}"
+        )
+        res_content = {"message": f"Media-Server: {error.message}"}
+        response = jsonify(res_content)
+        response.status_code = error.status_code
+        return response
+    elif isinstance(error, OAuth2Error):
+        app.logger.error(
+            f"Request to {request.path} resulted in {error.status_code}: "
+            f"{error.description} (AuthlibHTTPError)"
+        )
+        res_content = {"message": f"Media-Server: {error.description}"}
+        response = jsonify(res_content)
+        response.status_code = error.status_code
+        return response
+    else:
+        app.logger.error(f"Request to {request.path} resulted in {error} ({type(error)})")
+        res_content = {"message": "Media-Server: Internal Server Error"}
+        response = jsonify(res_content)
+        response.status_code = 500
+        return response
 
 
 @app.route("/system/media/get/<int:file_id>")
+@require_oauth()
 def serve(file_id):
-    if not check_login_valid():
-        return redirect("/")
-
     # get file id
     autoupdate_headers = dict(request.headers)
     del_keys = [key for key in autoupdate_headers if "content" in key]
     for key in del_keys:
         del autoupdate_headers[key]
-    ok, filename, auth_header = check_file_id(file_id, autoupdate_headers)
+    ok, filename, auth_header = check_file_id(file_id, autoupdate_headers, current_token.os_uid)
     if not ok:
         raise NotFoundError()
 
