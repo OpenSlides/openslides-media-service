@@ -1,7 +1,7 @@
 Flask==3.1.3
 gunicorn==25.1.0
 psycopg2==2.9.11
-requests==2.32.3
+requests==2.32.5
 
 # authlib
 git+https://github.com/kryptance/openslides-auth-service.git@feature/keycloak-oidc#egg=osauthlib&subdirectory=auth/libraries/pip-auth
