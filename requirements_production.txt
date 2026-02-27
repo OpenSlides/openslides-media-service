@@ -3,5 +3,7 @@ gunicorn==25.1.0
 psycopg2==2.9.11
 requests==2.32.5
 
-# authlib
+Authlib==1.6.0
+
+# osauthlib
 git+https://github.com/kryptance/openslides-auth-service.git@feature/keycloak-oidc#egg=osauthlib&subdirectory=auth/libraries/pip-auth
