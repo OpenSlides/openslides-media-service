@@ -4,4 +4,4 @@ psycopg2==2.9.11
 requests==2.32.3
 
 # authlib
-git+https://github.com/kryptance/openslides-auth-service.git@d074d2b#egg=os-authlib&subdirectory=libraries/pip-auth
+git+https://github.com/kryptance/openslides-auth-service.git@feature/keycloak-oidc#egg=osauthlib&subdirectory=auth/libraries/pip-auth
