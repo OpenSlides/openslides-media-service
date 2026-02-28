@@ -5,16 +5,13 @@ import os
 import sys
 from signal import SIGINT, SIGTERM, signal
 
-from authlib.integrations.flask_oauth2 import ResourceProtector, current_token
-from authlib.oauth2 import OAuth2Error
 from flask import Flask, Response, jsonify, redirect, request
 from flask import json
 
-from os_authlib.token_validator import create_openslides_token_validator
-from .auth.auth import AUTHENTICATION_HEADER, check_file_id
+from .auth.auth import AUTHENTICATION_HEADER, check_file_id, get_user_id_from_oidc
 from .config_handling import init_config, is_dev_mode
 from .database import Database
-from .exceptions import BadRequestError, HttpError, NotFoundError
+from .exceptions import BadRequestError, HttpError, NotFoundError, ServerError
 from .logging import init_logging
 
 app = Flask(__name__)
@@ -23,8 +20,6 @@ with app.app_context():
     init_config()
     database = Database()
 
-require_oauth = ResourceProtector()
-require_oauth.register_token_validator(create_openslides_token_validator())
 
 @app.errorhandler(Exception)
 def handle_view_error(error):
@@ -37,15 +32,6 @@ def handle_view_error(error):
         response = jsonify(res_content)
         response.status_code = error.status_code
         return response
-    elif isinstance(error, OAuth2Error):
-        app.logger.error(
-            f"Request to {request.path} resulted in {error.status_code}: "
-            f"{error.description} (AuthlibHTTPError)"
-        )
-        res_content = {"message": f"Media-Server: {error.description}"}
-        response = jsonify(res_content)
-        response.status_code = error.status_code
-        return response
     else:
         app.logger.error(f"Request to {request.path} resulted in {error} ({type(error)})")
         res_content = {"message": "Media-Server: Internal Server Error"}
@@ -55,14 +41,20 @@ def handle_view_error(error):
 
 
 @app.route("/system/media/get/<int:file_id>")
-@require_oauth()
 def serve(file_id):
+    # Authenticate via OIDC token
+    user_id = get_user_id_from_oidc()
+    if user_id == -1:
+        response = jsonify({"message": "Media-Server: Unauthorized"})
+        response.status_code = 401
+        return response
+
     # get file id
     autoupdate_headers = dict(request.headers)
     del_keys = [key for key in autoupdate_headers if "content" in key]
     for key in del_keys:
         del autoupdate_headers[key]
-    ok, filename, auth_header = check_file_id(file_id, autoupdate_headers, current_token.os_uid)
+    ok, filename, auth_header = check_file_id(file_id, autoupdate_headers, user_id)
     if not ok:
         raise NotFoundError()
 

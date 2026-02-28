@@ -1,13 +1,97 @@
+import os
+
 import requests
 from flask import current_app as app
 from flask import request
 
-from os_authlib import (
+from osauthlib import (
     AUTHENTICATION_HEADER,
     AuthenticateException,
     AuthHandler,
-    InvalidCredentialsException, AUTHORIZATION_HEADER, )
+    InvalidCredentialsException,
+    AUTHORIZATION_HEADER,
+    OidcAuthenticator,
+)
 from ..exceptions import ServerError
+
+
+# Lazy-initialized OIDC authenticator
+_oidc_authenticator = None
+
+
+def _get_oidc_authenticator():
+    global _oidc_authenticator
+    if _oidc_authenticator is None:
+        issuer = os.environ.get("OPENID_CONNECT_ISSUER", "")
+        client_id = os.environ.get("OPENID_CONNECT_CLIENT_ID", "")
+        if issuer and client_id:
+            _oidc_authenticator = OidcAuthenticator(
+                issuer=issuer,
+                audience=client_id,
+                debug_fn=app.logger.debug,
+            )
+    return _oidc_authenticator
+
+
+def get_user_id_from_oidc():
+    """
+    Authenticate via OIDC token or fall back to legacy auth.
+    Returns user_id or -1 on failure.
+    """
+    authorization = request.headers.get(AUTHORIZATION_HEADER, "")
+    if not authorization:
+        return -1
+
+    token = authorization
+    if token.lower().startswith("bearer "):
+        token = token[7:]
+
+    # Try OIDC if authenticator is configured
+    oidc = _get_oidc_authenticator()
+    if oidc and oidc.is_oidc_token(token):
+        try:
+            keycloak_id = oidc.extract_keycloak_id(token)
+            app.logger.debug(f"OIDC token validated, keycloak_id: {keycloak_id}")
+            # Look up user by keycloak_id via database
+            user_id = _lookup_user_by_keycloak_id(keycloak_id)
+            return user_id
+        except (AuthenticateException, InvalidCredentialsException) as e:
+            app.logger.warning(f"OIDC authentication failed: {e}")
+            return -1
+
+    # Fall back to legacy auth
+    return get_user_id()
+
+
+def _lookup_user_by_keycloak_id(keycloak_id):
+    """Look up OpenSlides user ID by keycloak_id via the database."""
+    import psycopg2
+
+    try:
+        password = app.config.get("MEDIA_DATABASE_PASSWORD", "openslides")
+        conn = psycopg2.connect(
+            host=app.config["MEDIA_DATABASE_HOST"],
+            port=app.config["MEDIA_DATABASE_PORT"],
+            dbname=app.config["MEDIA_DATABASE_NAME"],
+            user=app.config["MEDIA_DATABASE_USER"],
+            password=password,
+        )
+        try:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "SELECT id FROM user_t WHERE keycloak_id = %s AND is_active = true",
+                    (keycloak_id,),
+                )
+                row = cur.fetchone()
+                if row:
+                    return row[0]
+                app.logger.warning(f"No active user found with keycloak_id: {keycloak_id}")
+                return -1
+        finally:
+            conn.close()
+    except Exception as e:
+        app.logger.error(f"Database lookup for keycloak_id failed: {e}")
+        return -1
 
 
 def get_user_id():
