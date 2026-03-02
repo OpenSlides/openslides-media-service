@@ -6,10 +6,11 @@ from flask import request
 
 from osauthlib import (
     AUTHENTICATION_HEADER,
+    AUTHORIZATION_HEADER,
+    COOKIE_NAME,
     AuthenticateException,
     AuthHandler,
     InvalidCredentialsException,
-    AUTHORIZATION_HEADER,
     OidcAuthenticator,
 )
 from ..exceptions import ServerError
@@ -98,9 +99,10 @@ def get_user_id():
     """Returns the user id from the auth cookie."""
     auth_handler = AuthHandler(app.logger.debug)
     authentication = request.headers.get(AUTHORIZATION_HEADER, "")
+    refresh_id = request.cookies.get(COOKIE_NAME, "")
     app.logger.info(f"Get user id from auth header: {authentication}")
     try:
-        (user_id, _) = auth_handler.authenticate(authentication)
+        (user_id, _) = auth_handler.authenticate(authentication, refresh_id)
     except (AuthenticateException, InvalidCredentialsException):
         return -1
     return user_id
