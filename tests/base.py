@@ -32,8 +32,13 @@ def get_connection():
 
 def get_mediafile(id, use_cookie=True):
     cookies = {}
+    authentication = ""
     if use_cookie:
         # dummy cookie for testing
         token = jwt.encode({"userId": 1}, AUTH_DEV_COOKIE_SECRET)
         authentication = f"bearer {token}"
-    return requests.get(join(GET_URL, str(id)), headers={'Authentication': authentication}, allow_redirects=False)
+    return requests.get(
+        join(GET_URL, str(id)),
+        headers={"Authorization": authentication},
+        allow_redirects=False,
+    )
