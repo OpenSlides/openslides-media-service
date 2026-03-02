@@ -5,8 +5,8 @@ import jwt
 import psycopg2
 import pytest
 import requests
-from os_authlib import COOKIE_NAME
-from os_authlib.config import AUTH_DEV_COOKIE_SECRET
+from osauthlib import COOKIE_NAME
+from osauthlib.config import AUTH_DEV_COOKIE_SECRET
 
 GET_URL = "http://media:9006/system/media/get/"
 
