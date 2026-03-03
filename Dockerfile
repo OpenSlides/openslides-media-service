@@ -1,6 +1,6 @@
 ARG CONTEXT=prod
 
-FROM python:3.10.19-slim-bookworm AS base
+FROM python:3.10.20-slim-bookworm AS base
 
 ## Setup
 ARG CONTEXT
