@@ -151,10 +151,8 @@ def check_meeting_mediafile_id(meeting_mediafile_id, autoupdate_headers):
     ):
         return False, None, None, auth_header
 
-    if f"{mmf_prefix}/mediafile_id" not in content:
+    if not (mediafile_id := content.get(f"{mmf_prefix}/mediafile_id")):
         raise ServerError("The autoupdate did not provide a mediafile_id")
-
-    mediafile_id = content[f"{mmf_prefix}/mediafile_id"]
 
     if f"mediafile/{mediafile_id}/filename" not in content:
         raise ServerError("The autoupdate did not provide a filename")
