@@ -6,7 +6,7 @@ from signal import SIGINT, SIGTERM, signal
 
 from flask import Flask, Response, jsonify, redirect, request
 
-from .auth import AUTHENTICATION_HEADER, check_file_id, check_login_valid
+from .auth import AUTHENTICATION_HEADER, check_file_id, check_meeting_mediafile_id, check_login_valid
 from .config_handling import init_config, is_dev_mode
 from .database import Database
 from .exceptions import BadRequestError, HttpError, NotFoundError
@@ -33,8 +33,9 @@ def handle_view_error(error):
     return response
 
 
+@app.route("/system/media/get-meeting/<int:meeting_mediafile_id>")
 @app.route("/system/media/get/<int:file_id>")
-def serve(file_id):
+def serve(meeting_mediafile_id=None, file_id=None):
     if not check_login_valid():
         return redirect("/")
 
@@ -43,7 +44,14 @@ def serve(file_id):
     del_keys = [key for key in autoupdate_headers if "content" in key]
     for key in del_keys:
         del autoupdate_headers[key]
-    ok, filename, auth_header = check_file_id(file_id, autoupdate_headers)
+
+    if meeting_mediafile_id is not None:
+        ok, file_id, filename, auth_header = check_meeting_mediafile_id(
+            meeting_mediafile_id, autoupdate_headers
+        )
+    else:
+        ok, filename, auth_header = check_file_id(file_id, autoupdate_headers)
+
     if not ok:
         raise NotFoundError()
 
