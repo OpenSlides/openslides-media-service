@@ -40,7 +40,7 @@ def handle_view_error(error):
 
 @app.route("/system/media/get-meeting/<int:meeting_mediafile_id>")
 @app.route("/system/media/get/<int:file_id>")
-def serve(meeting_mediafile_id=None, file_id=None):
+def serve(file_id=None, meeting_mediafile_id=None):
     if not check_login_valid():
         return redirect("/")
 
