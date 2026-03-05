@@ -6,7 +6,12 @@ from signal import SIGINT, SIGTERM, signal
 
 from flask import Flask, Response, jsonify, redirect, request
 
-from .auth import AUTHENTICATION_HEADER, check_file_id, check_meeting_mediafile_id, check_login_valid
+from .auth import (
+    AUTHENTICATION_HEADER,
+    check_file_id,
+    check_meeting_mediafile_id,
+    check_login_valid,
+)
 from .config_handling import init_config, is_dev_mode
 from .database import Database
 from .exceptions import BadRequestError, HttpError, NotFoundError

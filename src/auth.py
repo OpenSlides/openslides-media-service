@@ -117,7 +117,9 @@ def check_meeting_mediafile_id(meeting_mediafile_id, autoupdate_headers):
             "ids": [meeting_mediafile_id],
         },
     ]
-    app.logger.debug(f"Send meeting mediafile check request: {autoupdate_url}: {payload}")
+    app.logger.debug(
+        f"Send meeting mediafile check request: {autoupdate_url}: {payload}"
+    )
 
     try:
         response = requests.post(
@@ -157,7 +159,12 @@ def check_meeting_mediafile_id(meeting_mediafile_id, autoupdate_headers):
     if f"mediafile/{mediafile_id}/filename" not in content:
         raise ServerError("The autoupdate did not provide a filename")
 
-    return True, mediafile_id, content[f"mediafile/{mediafile_id}/filename"], auth_header
+    return (
+        True,
+        mediafile_id,
+        content[f"mediafile/{mediafile_id}/filename"],
+        auth_header,
+    )
 
 
 def get_autoupdate_url(user_id):
