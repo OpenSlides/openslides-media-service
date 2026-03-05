@@ -73,10 +73,7 @@ def check_file_id(file_id, autoupdate_headers):
 
     auth_header = response.headers.get(AUTHENTICATION_HEADER)
 
-    if (
-        f"mediafile/{file_id}/id" not in content
-        or content[f"mediafile/{file_id}/id"] != file_id
-    ):
+    if content.get(f"mediafile/{file_id}/id") != file_id:
         return False, None, auth_header
 
     if f"mediafile/{file_id}/filename" not in content:
@@ -145,10 +142,7 @@ def check_meeting_mediafile_id(meeting_mediafile_id, autoupdate_headers):
     auth_header = response.headers.get(AUTHENTICATION_HEADER)
     mmf_prefix = f"meeting_mediafile/{meeting_mediafile_id}"
 
-    if (
-        f"{mmf_prefix}/id" not in content
-        or content[f"{mmf_prefix}/id"] != meeting_mediafile_id
-    ):
+    if content.get(f"{mmf_prefix}/id") != meeting_mediafile_id:
         return False, None, None, auth_header
 
     if not (mediafile_id := content.get(f"{mmf_prefix}/mediafile_id")):
