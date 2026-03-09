@@ -27,7 +27,6 @@ def test_not_ok_from_autoupdate():
     assert "message" in response.json()
 
 
-def test_redirect_if_not_logged_in():
+def test_unauthorized_if_not_logged_in():
     response = get_mediafile(2, use_cookie=False)
-    assert response.content == b"a2"
-    assert "text/plain" in response.headers.get("Content-Type")
+    assert response.status_code == 401

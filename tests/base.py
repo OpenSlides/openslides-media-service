@@ -4,7 +4,6 @@ import jwt
 import psycopg2
 import pytest
 import requests
-from osauthlib import COOKIE_NAME
 from osauthlib.config import AUTH_DEV_COOKIE_SECRET
 
 GET_URL = "http://media:9006/system/media/get/"
@@ -30,10 +29,13 @@ def get_connection():
 
 
 def get_mediafile(id, use_cookie=True):
-    cookies = {}
+    authentication = ""
     if use_cookie:
         # dummy cookie for testing
         token = jwt.encode({"userId": 1}, AUTH_DEV_COOKIE_SECRET)
-        cookie = f"bearer {token}"
-        cookies[COOKIE_NAME] = cookie
-    return requests.get(join(GET_URL, str(id)), cookies=cookies, allow_redirects=False)
+        authentication = f"bearer {token}"
+    return requests.get(
+        join(GET_URL, str(id)),
+        headers={"Authorization": authentication},
+        allow_redirects=False,
+    )
