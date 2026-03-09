@@ -5,8 +5,7 @@ import os
 import sys
 from signal import SIGINT, SIGTERM, signal
 
-from flask import Flask, Response, jsonify, redirect, request
-from flask import json
+from flask import Flask, Response, json, jsonify, redirect, request
 
 from .auth.auth import AUTHENTICATION_HEADER, check_file_id, get_user_id_from_oidc
 from .config_handling import init_config, is_dev_mode

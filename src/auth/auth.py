@@ -3,7 +3,6 @@ import os
 import requests
 from flask import current_app as app
 from flask import request
-
 from osauthlib import (
     AUTHENTICATION_HEADER,
     AUTHORIZATION_HEADER,
@@ -13,6 +12,7 @@ from osauthlib import (
     InvalidCredentialsException,
     OidcAuthenticator,
 )
+
 from ..exceptions import ServerError
 
 # Lazy-initialized OIDC authenticator
