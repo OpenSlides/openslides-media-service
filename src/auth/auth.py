@@ -97,9 +97,7 @@ def _lookup_user_by_keycloak_id(keycloak_id):
             row = cur.fetchone()
             if row:
                 return row[0]
-            app.logger.warning(
-                f"No active user found with keycloak_id: {keycloak_id}"
-            )
+            app.logger.warning(f"No active user found with keycloak_id: {keycloak_id}")
             return -1
     except Exception as e:
         app.logger.error(f"Database lookup for keycloak_id failed: {e}")
