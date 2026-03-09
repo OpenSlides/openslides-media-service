@@ -15,7 +15,6 @@ from osauthlib import (
 )
 from ..exceptions import ServerError
 
-
 # Lazy-initialized OIDC authenticator
 _oidc_authenticator = None
 
@@ -86,7 +85,9 @@ def _lookup_user_by_keycloak_id(keycloak_id):
                 row = cur.fetchone()
                 if row:
                     return row[0]
-                app.logger.warning(f"No active user found with keycloak_id: {keycloak_id}")
+                app.logger.warning(
+                    f"No active user found with keycloak_id: {keycloak_id}"
+                )
                 return -1
         finally:
             conn.close()
@@ -102,7 +103,7 @@ def get_user_id():
     refresh_id = request.cookies.get(COOKIE_NAME, "")
     app.logger.info(f"Get user id from auth header: {authentication}")
     try:
-        (user_id, _) = auth_handler.authenticate(authentication, refresh_id)
+        user_id, _ = auth_handler.authenticate(authentication, refresh_id)
     except (AuthenticateException, InvalidCredentialsException):
         return -1
     return user_id
@@ -161,8 +162,8 @@ def check_file_id(file_id, autoupdate_headers, user_id):
     auth_header = response.headers.get(AUTHORIZATION_HEADER)
 
     if (
-            f"mediafile/{file_id}/id" not in content
-            or content[f"mediafile/{file_id}/id"] != file_id
+        f"mediafile/{file_id}/id" not in content
+        or content[f"mediafile/{file_id}/id"] != file_id
     ):
         return False, None, auth_header
 

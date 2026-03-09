@@ -33,7 +33,9 @@ def handle_view_error(error):
         response.status_code = error.status_code
         return response
     else:
-        app.logger.error(f"Request to {request.path} resulted in {error} ({type(error)})")
+        app.logger.error(
+            f"Request to {request.path} resulted in {error} ({type(error)})"
+        )
         res_content = {"message": "Media-Server: Internal Server Error"}
         response = jsonify(res_content)
         response.status_code = 500
