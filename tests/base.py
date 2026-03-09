@@ -1,11 +1,9 @@
-from collections.abc import Mapping
 from os.path import join
 
 import jwt
 import psycopg2
 import pytest
 import requests
-from osauthlib import COOKIE_NAME
 from osauthlib.config import AUTH_DEV_COOKIE_SECRET
 
 GET_URL = "http://media:9006/system/media/get/"
@@ -31,7 +29,6 @@ def get_connection():
 
 
 def get_mediafile(id, use_cookie=True):
-    cookies = {}
     authentication = ""
     if use_cookie:
         # dummy cookie for testing

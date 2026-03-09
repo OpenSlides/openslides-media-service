@@ -3,8 +3,8 @@ import os
 import requests
 from flask import current_app as app
 from flask import request
+from osauthlib import AUTHENTICATION_HEADER  # noqa: F401 (re-exported)
 from osauthlib import (
-    AUTHENTICATION_HEADER,
     AUTHORIZATION_HEADER,
     COOKIE_NAME,
     AuthenticateException,

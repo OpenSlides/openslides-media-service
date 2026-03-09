@@ -1,16 +1,15 @@
 import atexit
 import base64
 import json
-import os
 import sys
 from signal import SIGINT, SIGTERM, signal
 
-from flask import Flask, Response, json, jsonify, redirect, request
+from flask import Flask, Response, jsonify, request
 
 from .auth.auth import AUTHENTICATION_HEADER, check_file_id, get_user_id_from_oidc
 from .config_handling import init_config, is_dev_mode
 from .database import Database
-from .exceptions import BadRequestError, HttpError, NotFoundError, ServerError
+from .exceptions import BadRequestError, HttpError, NotFoundError
 from .logging import init_logging
 
 app = Flask(__name__)
