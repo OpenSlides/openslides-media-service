@@ -22,8 +22,8 @@ _oidc_authenticator = None
 def _get_oidc_authenticator():
     global _oidc_authenticator
     if _oidc_authenticator is None:
-        issuer = os.environ.get("OPENID_CONNECT_ISSUER", "")
-        client_id = os.environ.get("OPENID_CONNECT_CLIENT_ID", "")
+        issuer = os.environ.get("OIDC_PROVIDER_URL", "")
+        client_id = os.environ.get("OIDC_CLIENT_ID", "")
         if issuer and client_id:
             _oidc_authenticator = OidcAuthenticator(
                 issuer=issuer,
@@ -63,37 +63,49 @@ def get_user_id_from_oidc():
     return get_user_id()
 
 
-def _lookup_user_by_keycloak_id(keycloak_id):
-    """Look up OpenSlides user ID by keycloak_id via the database."""
-    import psycopg2
+_db_pool = None
 
-    try:
-        password = app.config.get("MEDIA_DATABASE_PASSWORD", "openslides")
-        conn = psycopg2.connect(
+
+def _get_db_pool():
+    """Return a shared connection pool, creating it on first call."""
+    global _db_pool
+    if _db_pool is None:
+        from psycopg2 import pool
+
+        _db_pool = pool.SimpleConnectionPool(
+            1,
+            5,
             host=app.config["MEDIA_DATABASE_HOST"],
             port=app.config["MEDIA_DATABASE_PORT"],
             dbname=app.config["MEDIA_DATABASE_NAME"],
             user=app.config["MEDIA_DATABASE_USER"],
-            password=password,
+            password=app.config.get("MEDIA_DATABASE_PASSWORD", "openslides"),
         )
-        try:
-            with conn.cursor() as cur:
-                cur.execute(
-                    "SELECT id FROM user_t WHERE keycloak_id = %s AND is_active = true",
-                    (keycloak_id,),
-                )
-                row = cur.fetchone()
-                if row:
-                    return row[0]
-                app.logger.warning(
-                    f"No active user found with keycloak_id: {keycloak_id}"
-                )
-                return -1
-        finally:
-            conn.close()
+    return _db_pool
+
+
+def _lookup_user_by_keycloak_id(keycloak_id):
+    """Look up OpenSlides user ID by keycloak_id via the database."""
+    pool = _get_db_pool()
+    conn = pool.getconn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT id FROM user_t WHERE keycloak_id = %s AND is_active = true",
+                (keycloak_id,),
+            )
+            row = cur.fetchone()
+            if row:
+                return row[0]
+            app.logger.warning(
+                f"No active user found with keycloak_id: {keycloak_id}"
+            )
+            return -1
     except Exception as e:
         app.logger.error(f"Database lookup for keycloak_id failed: {e}")
         return -1
+    finally:
+        pool.putconn(conn)
 
 
 def get_user_id():
