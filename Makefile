@@ -19,9 +19,6 @@ run-tests:
 lint:
 	bash dev/run-lint.sh -l
 
-run-tests-ci: | start-test-setup
-	docker compose -f docker-compose.test.yml exec -T tests pytest
-
 # CI
 
 check-black:
@@ -35,6 +32,9 @@ flake8:
 
 stop-tests-ci:
 	docker compose -f docker-compose.test.yml down
+
+run-tests-ci: | start-test-setup
+	docker compose -f docker-compose.test.yml exec -T tests pytest
 
 # Cleanup
 
