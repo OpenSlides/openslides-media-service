@@ -22,6 +22,20 @@ lint:
 run-tests-ci: | start-test-setup
 	docker compose -f docker-compose.test.yml exec -T tests pytest
 
+# CI
+
+check-black:
+	docker compose -f docker-compose.test.yml exec -T tests black --check --diff src/ tests/
+
+check-isort:
+	docker compose -f docker-compose.test.yml exec -T tests isort --check-only --diff src/ tests/
+
+flake8:
+	docker compose -f docker-compose.test.yml exec -T tests flake8 src/ tests/
+
+stop-tests-ci:
+	docker compose -f docker-compose.test.yml down
+
 # Cleanup
 
 run-cleanup: | build-dev
@@ -41,21 +55,6 @@ run-dev run-dev-attach run-dev-attached run-dev-standalone run-dev-interactive s
 
 build-dummy-autoupdate: | deprecation-warning
 	docker build . -f tests/dummy_autoupdate/Dockerfile.dummy_autoupdate --tag openslides-media-dummy-autoupdate
-
-check-black:
-	@make deprecation-warning-alternative ALTERNATIVE="run-lint"
-	docker compose -f docker-compose.test.yml exec -T tests black --check --diff src/ tests/
-
-check-isort:
-	@make deprecation-warning-alternative ALTERNATIVE="run-lint"
-	docker compose -f docker-compose.test.yml exec -T tests isort --check-only --diff src/ tests/
-
-flake8:
-	@make deprecation-warning-alternative ALTERNATIVE="run-lint"
-	docker compose -f docker-compose.test.yml exec -T tests flake8 src/ tests/
-
-stop-tests:
-	docker compose -f docker-compose.test.yml down
 
 start-test-setup: | deprecation-warning build-dev build-tests build-dummy-autoupdate
 	docker compose -f docker-compose.test.yml up -d
